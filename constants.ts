@@ -2,6 +2,22 @@ import { Product } from './types';
 
 export const APP_NAME = "RASEL STORE";
 
+// Expanded Category List for Sidebar
+export const ALL_CATEGORIES = [
+  { id: 'c1', name: 'Cyber Fashion', icon: 'Shirt' },
+  { id: 'c2', name: 'Smart Phones', icon: 'Smartphone' },
+  { id: 'c3', name: 'Laptops & PC', icon: 'Monitor' },
+  { id: 'c4', name: 'Audio Gear', icon: 'Headphones' },
+  { id: 'c5', name: 'Cameras', icon: 'Camera' },
+  { id: 'c6', name: 'Gaming Console', icon: 'Gamepad' },
+  { id: 'c7', name: 'Smart Home', icon: 'Home' },
+  { id: 'c8', name: 'Accessories', icon: 'Watch' },
+  { id: 'c9', name: 'Drones', icon: 'Wind' },
+  { id: 'c10', name: 'Networking', icon: 'Wifi' },
+  { id: 'c11', name: 'Software', icon: 'Code' },
+  { id: 'c12', name: 'Health Tech', icon: 'Activity' },
+];
+
 export const CATEGORIES = [
   { id: 'c1', name: 'Cyber Apparel', slug: 'apparel', gradient: 'from-pink-500 to-rose-500' },
   { id: 'c2', name: 'Neural Tech', slug: 'tech', gradient: 'from-cyan-400 to-blue-600' },
@@ -157,6 +173,106 @@ export const MOCK_PRODUCTS: Product[] = [
     arEnabled: false,
     stock: 50,
     carbonFootprint: "Low"
+  },
+  // New Products for denser UI
+  {
+    id: 'p7',
+    name: 'Quantum Earbuds Pro',
+    price: 3200,
+    currency: 'BDT',
+    category: 'Audio',
+    description: 'Zero-latency neural interface earbuds with active noise cancellation.',
+    images: ['https://picsum.photos/id/1084/600/800'],
+    specs: { Battery: '30h', ANC: 'Active' },
+    rating: 4.4, reviews: 55, arEnabled: false, stock: 100, carbonFootprint: 'Low'
+  },
+  {
+    id: 'p8',
+    name: 'Solar Punk Hoodie',
+    price: 4500,
+    currency: 'BDT',
+    category: 'Apparel',
+    description: 'Woven with flexible solar threads to charge devices on the go.',
+    images: ['https://picsum.photos/id/338/600/800'], // Reusing generic image for demo
+    specs: { Output: '5V/2A', Fabric: 'Cotton-Tech' },
+    rating: 4.2, reviews: 18, arEnabled: false, stock: 20, carbonFootprint: 'Low'
+  },
+  {
+    id: 'p9',
+    name: 'Haptic Gaming Suit',
+    price: 85000,
+    currency: 'BDT',
+    category: 'Gaming',
+    description: 'Full body haptic feedback suit for VR immersion.',
+    images: ['https://picsum.photos/id/1060/600/800'],
+    specs: { Points: '128', Connectivity: 'WiFi 6E' },
+    rating: 4.9, reviews: 12, arEnabled: false, stock: 3, carbonFootprint: 'High'
+  },
+  {
+    id: 'p10',
+    name: 'Portable Fusion Reactor',
+    price: 150000,
+    currency: 'BDT',
+    category: 'Energy',
+    description: 'Safe, pocket-sized cold fusion generator for unlimited power.',
+    images: ['https://picsum.photos/id/237/600/800'], // Dog for fun/placeholder
+    specs: { Output: '10kW', Safety: 'A++' },
+    rating: 5.0, reviews: 1, arEnabled: true, stock: 1, carbonFootprint: 'Low'
+  },
+  {
+    id: 'p11',
+    name: 'Smart Plant Pot',
+    price: 1200,
+    currency: 'BDT',
+    category: 'Home',
+    description: 'AI-driven pot that moves to find sunlight.',
+    images: ['https://picsum.photos/id/1080/600/800'],
+    specs: { Mobility: 'Wheeled', Sensor: 'UV' },
+    rating: 4.1, reviews: 200, arEnabled: false, stock: 45, carbonFootprint: 'Neutral'
+  },
+  {
+    id: 'p12',
+    name: 'Neon Sign: Tokyo',
+    price: 2500,
+    currency: 'BDT',
+    category: 'Home',
+    description: 'Cyberpunk aesthetic neon sign for wall mounting.',
+    images: ['https://picsum.photos/id/1076/600/800'],
+    specs: { Type: 'LED', Power: 'USB' },
+    rating: 4.6, reviews: 88, arEnabled: true, stock: 15, carbonFootprint: 'Medium'
+  },
+  {
+    id: 'p13',
+    name: 'Mechanical Keyboard X1',
+    price: 5500,
+    currency: 'BDT',
+    category: 'Tech',
+    description: 'Transparent chassis with RGB underglow and hot-swappable switches.',
+    images: ['https://picsum.photos/id/366/600/800'],
+    specs: { Switch: 'Red', Layout: '65%' },
+    rating: 4.7, reviews: 300, arEnabled: false, stock: 60, carbonFootprint: 'Medium'
+  },
+  {
+    id: 'p14',
+    name: 'Retro Game Stick',
+    price: 1500,
+    currency: 'BDT',
+    category: 'Gaming',
+    description: 'Plug and play HDMI stick with 10,000 classic games.',
+    images: ['https://picsum.photos/id/96/600/800'],
+    specs: { Games: '10k+', Output: 'HDMI' },
+    rating: 3.9, reviews: 450, arEnabled: false, stock: 200, carbonFootprint: 'Low'
+  },
+  {
+    id: 'p15',
+    name: 'CyberDog 2.0',
+    price: 250000,
+    currency: 'BDT',
+    category: 'Robotics',
+    description: 'Loyal robotic companion with advanced pathfinding.',
+    images: ['https://picsum.photos/id/169/600/800'],
+    specs: { Speed: '3m/s', Battery: '2h' },
+    rating: 4.9, reviews: 5, arEnabled: true, stock: 2, carbonFootprint: 'High'
   }
 ];
 
