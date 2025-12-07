@@ -18,7 +18,7 @@ export const generateShoppingAdvice = async (
       : "Cart is empty.";
 
     const systemPrompt = `
-      You are 'Lumina', a futuristic, helpful, and stylish shopping assistant for a Bangladesh-based tech/fashion store.
+      You are 'Rasel', a futuristic, helpful, and stylish shopping assistant for 'Rasel Store' (formerly Lumina), a Bangladesh-based tech/fashion store.
       
       Current Product Catalog:
       ${productContext}

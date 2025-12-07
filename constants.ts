@@ -1,6 +1,13 @@
 import { Product } from './types';
 
-export const APP_NAME = "LUMINA";
+export const APP_NAME = "RASEL STORE";
+
+export const CATEGORIES = [
+  { id: 'c1', name: 'Cyber Apparel', slug: 'apparel', gradient: 'from-pink-500 to-rose-500' },
+  { id: 'c2', name: 'Neural Tech', slug: 'tech', gradient: 'from-cyan-400 to-blue-600' },
+  { id: 'c3', name: 'Anti-Grav Footwear', slug: 'footwear', gradient: 'from-violet-500 to-purple-600' },
+  { id: 'c4', name: 'Smart Home', slug: 'home', gradient: 'from-emerald-400 to-green-600' }
+];
 
 export const MOCK_PRODUCTS: Product[] = [
   {
@@ -90,6 +97,50 @@ export const MOCK_PRODUCTS: Product[] = [
     arEnabled: false,
     stock: 8,
     carbonFootprint: "High"
+  },
+  {
+    id: 'p5',
+    name: 'Holo-Projection Watch',
+    price: 22000,
+    currency: 'BDT',
+    category: 'Tech',
+    description: 'Wrist-mounted holographic display projector. Syncs with all devices for air-touch control.',
+    images: [
+      'https://picsum.photos/id/175/600/800',
+      'https://picsum.photos/id/3/600/800'
+    ],
+    specs: {
+      Battery: '48 Hours',
+      Projection: '10 inch HD',
+      Sensor: 'LiDAR'
+    },
+    rating: 4.5,
+    reviews: 89,
+    arEnabled: true,
+    stock: 12,
+    carbonFootprint: "Medium"
+  },
+  {
+    id: 'p6',
+    name: 'Stealth Urban Pack',
+    price: 6500,
+    currency: 'BDT',
+    category: 'Accessories',
+    description: 'Anti-theft minimalist backpack with solar charging fabric and signal blocking pockets.',
+    images: [
+      'https://picsum.photos/id/367/600/800',
+      'https://picsum.photos/id/531/600/800'
+    ],
+    specs: {
+      Capacity: '25L',
+      Material: 'Kevlar Weave',
+      Solar: '5W Panel'
+    },
+    rating: 4.8,
+    reviews: 340,
+    arEnabled: false,
+    stock: 50,
+    carbonFootprint: "Low"
   }
 ];
 
