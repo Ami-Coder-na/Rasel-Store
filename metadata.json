@@ -1,0 +1,9 @@
+{
+  "name": "Rasel Store",
+  "description": "A futuristic, adaptive e-commerce experience featuring AI Copilot, AR try-on visuals, and zero-wait interfaces.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone",
+    "geolocation"
+  ]
+}
