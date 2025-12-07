@@ -1,12 +1,14 @@
+
 import React, { useState, useEffect, useRef } from 'react';
-import { ShoppingBag, Search, Menu, Sun, Moon, Zap, User, ArrowRight, Truck, ShieldCheck, Cpu, Mail, MapPin, Phone, Globe, Instagram, Facebook, Twitter, X, Clock, Coffee, Sparkles, Play, Star, Plus, Flame, TrendingUp, Gift, Headphones, Lock, ChevronRight, ChevronLeft, Smartphone, Watch, Camera, Gamepad, Shirt, Home, Monitor, Wifi, Code, Activity, Wind, Anchor, Scale, Eye } from 'lucide-react';
+import { ShoppingBag, Search, Menu, Sun, Moon, Zap, User, ArrowRight, Truck, ShieldCheck, Cpu, Mail, MapPin, Phone, Globe, Instagram, Facebook, Twitter, X, Clock, Coffee, Sparkles, Play, Star, Plus, Flame, TrendingUp, Gift, Headphones, Lock, ChevronRight, ChevronLeft, Smartphone, Watch, Camera, Gamepad, Shirt, Home, Monitor, Wifi, Code, Activity, Wind, Anchor, Scale, Eye, CreditCard, Send, Youtube, Linkedin, LogOut, Filter, History } from 'lucide-react';
 import { MOCK_PRODUCTS, SUGGESTED_QUERIES, APP_NAME, CATEGORIES, SERVICE_FEATURES, BRANDS, ALL_CATEGORIES } from './constants';
-import { Product, CartItem, UserContext, ViewState } from './types';
+import { Product, CartItem, UserContext, ViewState, UserProfile } from './types';
 import { Copilot } from './components/Copilot';
 import { OneSlideCheckout } from './components/OneSlideCheckout';
 import { Product3DViewer } from './components/Product3DViewer';
 import { CompareView } from './components/CompareView';
 import { QuickViewModal } from './components/QuickViewModal';
+import { AuthModal } from './components/AuthModal';
 
 // --- Layout Constants ---
 const CONTAINER_CLASS = "max-w-[1400px] mx-auto px-4 lg:px-6";
@@ -29,7 +31,7 @@ const TopBar = () => (
   </div>
 );
 
-const CategorySidebar = () => (
+const CategorySidebar = ({ onSelect }: { onSelect: (categoryName: string) => void }) => (
   <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-white/10 rounded-lg shadow-sm h-full py-2 overflow-y-auto hidden lg:block custom-scrollbar">
     {ALL_CATEGORIES.map((cat) => {
       // Map string icon name to component (simplified for demo)
@@ -37,7 +39,11 @@ const CategorySidebar = () => (
       const Icon = IconMap[cat.icon] || Sparkles;
       
       return (
-        <div key={cat.id} className="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-100 dark:hover:bg-white/5 cursor-pointer group transition-colors">
+        <div 
+          key={cat.id} 
+          onClick={() => onSelect(cat.name)}
+          className="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-100 dark:hover:bg-white/5 cursor-pointer group transition-colors"
+        >
           <Icon className="w-4 h-4 text-gray-500 dark:text-gray-400 group-hover:text-cyan-600 dark:group-hover:text-cyan-400" />
           <span className="text-xs md:text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-cyan-600 dark:group-hover:text-cyan-400">{cat.name}</span>
           <ChevronRight className="w-3 h-3 ml-auto text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -127,7 +133,7 @@ const ProductCardMinimal: React.FC<{
   onQuickView?: (e: any) => void,
   isCompared?: boolean 
 }> = ({ product, onClick, onAdd, onCompare, onQuickView, isCompared }) => (
-  <div onClick={onClick} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-white/10 rounded-lg hover:shadow-[0_4px_20px_rgba(0,0,0,0.1)] transition-all cursor-pointer group flex flex-col overflow-hidden relative">
+  <div onClick={onClick} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-white/10 rounded-lg hover:shadow-[0_4px_20px_rgba(0,0,0,0.1)] transition-all cursor-pointer group flex flex-col overflow-hidden relative h-full">
     <div className="relative aspect-square bg-gray-50 dark:bg-black/20 overflow-hidden">
       <img src={product.images[0]} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
       {product.arEnabled && (
@@ -192,9 +198,25 @@ const App = () => {
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [compareList, setCompareList] = useState<Product[]>([]);
+  
+  // Persistent Recently Viewed State
+  const [recentlyViewed, setRecentlyViewed] = useState<Product[]>(() => {
+    try {
+      const saved = localStorage.getItem('rasel_recently_viewed');
+      return saved ? JSON.parse(saved) : [];
+    } catch (e) {
+      return [];
+    }
+  });
+
   const [searchQuery, setSearchQuery] = useState('');
   const [themeMode, setThemeMode] = useState<'dark' | 'light'>('light');
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  
+  // Auth State
+  const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
+  const [isAuthOpen, setIsAuthOpen] = useState(false);
 
   // Auto-play Slider
   useEffect(() => {
@@ -203,6 +225,11 @@ const App = () => {
     }, 4000);
     return () => clearInterval(timer);
   }, []);
+
+  // Save recently viewed to local storage
+  useEffect(() => {
+    localStorage.setItem('rasel_recently_viewed', JSON.stringify(recentlyViewed));
+  }, [recentlyViewed]);
 
   const addToCart = (product: Product) => {
     setCart(prev => {
@@ -232,8 +259,57 @@ const App = () => {
 
   const handleProductClick = (product: Product) => {
     setSelectedProduct(product);
+    
+    // Add to recently viewed with duplicate removal and limit
+    setRecentlyViewed(prev => {
+      const filtered = prev.filter(p => p.id !== product.id);
+      return [product, ...filtered].slice(0, 10);
+    });
+
     setView(ViewState.PRODUCT_DETAIL);
   };
+
+  const handleLogin = (user: UserProfile) => {
+    setCurrentUser(user);
+    setIsAuthOpen(false);
+  };
+
+  const handleLogout = () => {
+    setCurrentUser(null);
+  };
+
+  const handleCategorySelect = (categoryName: string) => {
+    setActiveCategory(categoryName);
+    setView(ViewState.PRODUCTS);
+    setSearchQuery(''); // Clear search when picking a category
+  };
+
+  // Filter products based on category and search
+  const getFilteredProducts = () => {
+    let filtered = MOCK_PRODUCTS;
+
+    if (activeCategory) {
+      filtered = filtered.filter(p => {
+        const cat = activeCategory.toLowerCase();
+        // Simple mapping/matching logic for demo
+        if (cat.includes('fashion') || cat.includes('apparel')) return p.category === 'Apparel';
+        if (cat.includes('phone') || cat.includes('laptop') || cat.includes('tech') || cat.includes('camera') || cat.includes('drone')) return p.category === 'Tech';
+        if (cat.includes('audio')) return p.category === 'Audio';
+        if (cat.includes('gaming')) return p.category === 'Gaming';
+        if (cat.includes('home')) return p.category === 'Home';
+        if (cat.includes('accessories')) return p.category === 'Accessories';
+        return true; // Fallback to show all if no specific match for demo
+      });
+    }
+
+    if (searchQuery) {
+      filtered = filtered.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()));
+    }
+
+    return filtered;
+  };
+
+  const displayedProducts = getFilteredProducts();
 
   return (
     <div className={themeMode}>
@@ -247,7 +323,7 @@ const App = () => {
           <div className={`${CONTAINER_CLASS} py-4 flex items-center gap-4 lg:gap-8`}>
             
             {/* Logo */}
-            <div className="flex items-center gap-2 cursor-pointer" onClick={() => setView(ViewState.HOME)}>
+            <div className="flex items-center gap-2 cursor-pointer" onClick={() => { setView(ViewState.HOME); setActiveCategory(null); }}>
                <div className="w-8 h-8 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-lg">R</div>
                <span className="text-xl md:text-2xl font-black font-heading tracking-tighter text-gray-800 dark:text-white">{APP_NAME}</span>
             </div>
@@ -260,7 +336,7 @@ const App = () => {
                   placeholder="Search in Rasel Store..." 
                   className="w-full bg-gray-100 dark:bg-white/10 border border-transparent focus:bg-white dark:focus:bg-black focus:border-cyan-500 rounded-lg pl-4 pr-12 py-2.5 text-sm outline-none transition-all dark:text-white"
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={(e) => { setSearchQuery(e.target.value); if (e.target.value) setView(ViewState.PRODUCTS); }}
                 />
                 <button className="absolute right-1 top-1 bg-cyan-600 hover:bg-cyan-700 text-white p-1.5 rounded-md transition-colors">
                   <Search className="w-4 h-4" />
@@ -279,12 +355,32 @@ const App = () => {
                  {themeMode === 'light' ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
                </button>
                
-               <div className="flex items-center gap-2 cursor-pointer group">
-                  <User className="w-6 h-6 text-gray-600 dark:text-gray-300 group-hover:text-cyan-600" />
-                  <div className="hidden lg:block">
-                     <p className="text-[10px] text-gray-400">Welcome</p>
-                     <p className="text-xs font-bold leading-none">Sign In / Register</p>
-                  </div>
+               {/* User Auth Trigger */}
+               <div className="flex items-center gap-2 cursor-pointer group relative">
+                  {currentUser ? (
+                    <div className="flex items-center gap-2" onClick={handleLogout} title="Click to Logout">
+                      <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-cyan-500">
+                        {currentUser.avatar ? (
+                          <img src={currentUser.avatar} alt="User" className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full bg-cyan-600 flex items-center justify-center text-white font-bold">{currentUser.name.charAt(0)}</div>
+                        )}
+                      </div>
+                      <div className="hidden lg:block">
+                        <p className="text-[10px] text-gray-400">Hello,</p>
+                        <p className="text-xs font-bold leading-none truncate max-w-[80px]">{currentUser.name}</p>
+                      </div>
+                      <LogOut className="w-4 h-4 text-gray-400 hover:text-red-500 ml-1" />
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2" onClick={() => setIsAuthOpen(true)}>
+                      <User className="w-6 h-6 text-gray-600 dark:text-gray-300 group-hover:text-cyan-600" />
+                      <div className="hidden lg:block">
+                         <p className="text-[10px] text-gray-400">Welcome</p>
+                         <p className="text-xs font-bold leading-none">Sign In / Register</p>
+                      </div>
+                    </div>
+                  )}
                </div>
 
                <div className="relative cursor-pointer" onClick={() => cart.length > 0 && setView(ViewState.CART_CHECKOUT)}>
@@ -307,7 +403,7 @@ const App = () => {
               <div className="grid grid-cols-12 gap-4 h-auto lg:h-[380px] mb-6">
                  {/* 1. Sidebar Category (20%) */}
                  <div className="hidden lg:col-span-2 lg:block h-full">
-                    <CategorySidebar />
+                    <CategorySidebar onSelect={handleCategorySelect} />
                  </div>
 
                  {/* 2. Main Slider (60%) */}
@@ -318,7 +414,7 @@ const App = () => {
                           <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent flex flex-col justify-center px-8 md:px-16">
                              <h2 className="text-3xl md:text-5xl font-black text-white font-heading mb-2 translate-y-4 opacity-0 transition-all duration-700 delay-300" style={{ transform: i === currentSlide ? 'translateY(0)' : 'translateY(20px)', opacity: i === currentSlide ? 1 : 0 }}>{slide.title}</h2>
                              <p className="text-cyan-400 text-lg md:text-xl font-bold mb-6 translate-y-4 opacity-0 transition-all duration-700 delay-500" style={{ transform: i === currentSlide ? 'translateY(0)' : 'translateY(20px)', opacity: i === currentSlide ? 1 : 0 }}>{slide.sub}</p>
-                             <button className="bg-white text-gray-900 font-bold py-2 px-6 rounded-full w-fit hover:bg-cyan-500 hover:text-white transition-colors">Shop Now</button>
+                             <button onClick={() => setView(ViewState.PRODUCTS)} className="bg-white text-gray-900 font-bold py-2 px-6 rounded-full w-fit hover:bg-cyan-500 hover:text-white transition-colors">Shop Now</button>
                           </div>
                        </div>
                     ))}
@@ -333,17 +429,29 @@ const App = () => {
                  {/* 3. Right Promo Column (20%) */}
                  <div className="hidden lg:col-span-2 lg:flex flex-col gap-4 h-full">
                     <div className="flex-1 bg-cyan-50 dark:bg-cyan-900/10 rounded-lg p-4 flex flex-col justify-center items-center text-center border border-cyan-100 dark:border-cyan-500/20">
-                       <div className="w-12 h-12 bg-cyan-100 dark:bg-cyan-800 rounded-full flex items-center justify-center mb-2">
-                          <User className="w-6 h-6 text-cyan-600 dark:text-cyan-300" />
+                       <div className="w-12 h-12 bg-cyan-100 dark:bg-cyan-800 rounded-full flex items-center justify-center mb-2 overflow-hidden">
+                          {currentUser ? (
+                             currentUser.avatar ? <img src={currentUser.avatar} className="w-full h-full object-cover" /> : <span className="font-bold text-cyan-600 dark:text-cyan-300 text-xl">{currentUser.name.charAt(0)}</span>
+                          ) : (
+                             <User className="w-6 h-6 text-cyan-600 dark:text-cyan-300" />
+                          )}
                        </div>
-                       <p className="text-xs text-gray-500 dark:text-gray-400">Welcome to Rasel Store</p>
+                       <p className="text-xs text-gray-500 dark:text-gray-400">
+                          {currentUser ? `Hi, ${currentUser.name}` : 'Welcome to Rasel Store'}
+                       </p>
                        <div className="flex gap-2 mt-3 w-full">
-                          <button className="flex-1 bg-cyan-600 text-white text-xs font-bold py-1.5 rounded-md hover:bg-cyan-700">Join</button>
-                          <button className="flex-1 bg-white dark:bg-white/10 text-cyan-600 dark:text-cyan-400 border border-cyan-200 dark:border-cyan-500/30 text-xs font-bold py-1.5 rounded-md hover:bg-gray-50">Sign In</button>
+                          {currentUser ? (
+                             <button className="flex-1 bg-cyan-600 text-white text-xs font-bold py-1.5 rounded-md hover:bg-cyan-700 w-full">My Account</button>
+                          ) : (
+                             <>
+                                <button onClick={() => setIsAuthOpen(true)} className="flex-1 bg-cyan-600 text-white text-xs font-bold py-1.5 rounded-md hover:bg-cyan-700">Join</button>
+                                <button onClick={() => setIsAuthOpen(true)} className="flex-1 bg-white dark:bg-white/10 text-cyan-600 dark:text-cyan-400 border border-cyan-200 dark:border-cyan-500/30 text-xs font-bold py-1.5 rounded-md hover:bg-gray-50">Sign In</button>
+                             </>
+                          )}
                        </div>
                     </div>
-                    <div className="h-[45%] bg-orange-50 dark:bg-orange-900/10 rounded-lg overflow-hidden relative">
-                       <img src="https://images.unsplash.com/photo-1593642702821-c8da6771f0c6?q=80&w=800" className="w-full h-full object-cover opacity-80" />
+                    <div className="h-[45%] bg-orange-50 dark:bg-orange-900/10 rounded-lg overflow-hidden relative cursor-pointer" onClick={() => { setActiveCategory('Tech'); setView(ViewState.PRODUCTS); }}>
+                       <img src="https://images.unsplash.com/photo-1593642702821-c8da6771f0c6?q=80&w=800" className="w-full h-full object-cover opacity-80 hover:scale-105 transition-transform duration-700" />
                        <div className="absolute inset-0 p-4 flex flex-col justify-end">
                           <span className="bg-orange-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-sm w-fit mb-1">NEW</span>
                           <p className="text-white font-bold leading-tight text-sm">Tech Week Deals</p>
@@ -385,7 +493,7 @@ const App = () => {
                              </div>
                           </div>
                        </div>
-                       <button className="text-orange-500 border border-orange-500 hover:bg-orange-50 text-xs font-bold px-4 py-1.5 rounded-full transition-colors">SHOP ALL</button>
+                       <button onClick={() => setView(ViewState.PRODUCTS)} className="text-orange-500 border border-orange-500 hover:bg-orange-50 text-xs font-bold px-4 py-1.5 rounded-full transition-colors">SHOP ALL</button>
                     </div>
                     
                     {/* Horizontal Scroll Container */}
@@ -410,7 +518,11 @@ const App = () => {
                  <h2 className="text-lg font-bold text-gray-700 dark:text-white mb-4">Categories</h2>
                  <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3 md:gap-4">
                     {ALL_CATEGORIES.slice(0, 8).map((cat, idx) => (
-                       <div key={idx} className="bg-white dark:bg-white/5 rounded-lg border border-gray-200 dark:border-white/5 p-3 flex flex-col items-center justify-center gap-2 hover:shadow-md cursor-pointer transition-all hover:border-cyan-500/30 group">
+                       <div 
+                        key={idx} 
+                        onClick={() => handleCategorySelect(cat.name)}
+                        className="bg-white dark:bg-white/5 rounded-lg border border-gray-200 dark:border-white/5 p-3 flex flex-col items-center justify-center gap-2 hover:shadow-md cursor-pointer transition-all hover:border-cyan-500/30 group"
+                      >
                           <div className="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center group-hover:scale-110 transition-transform">
                              <Sparkles className="w-5 h-5 text-gray-500 dark:text-gray-400 group-hover:text-cyan-500" />
                           </div>
@@ -452,26 +564,79 @@ const App = () => {
                     <button className="px-12 py-3 border-2 border-cyan-600 text-cyan-600 dark:text-cyan-400 dark:border-cyan-400 font-bold rounded-full hover:bg-cyan-600 hover:text-white transition-all uppercase tracking-widest text-xs">Load More</button>
                  </div>
               </div>
+
+              {/* SECTION: Recently Viewed */}
+              {recentlyViewed.length > 0 && (
+                <div className="mb-12 animate-fade-in-up">
+                   <div className="flex items-center gap-2 mb-6">
+                      <History className="w-6 h-6 text-gray-600 dark:text-gray-400" />
+                      <h2 className="text-xl font-bold text-gray-800 dark:text-white">Recently Viewed</h2>
+                   </div>
+                   <div className="bg-white dark:bg-gray-900 rounded-xl p-4 shadow-sm border border-gray-200 dark:border-white/5">
+                      <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-2">
+                         {recentlyViewed.map(p => (
+                            <div key={p.id} className="min-w-[150px] w-[150px]">
+                               <ProductCardMinimal 
+                                 product={p} 
+                                 onClick={() => handleProductClick(p)} 
+                                 onAdd={() => addToCart(p)} 
+                                 onCompare={() => toggleCompare(p)}
+                                 onQuickView={() => setQuickViewProduct(p)}
+                                 isCompared={compareList.some(c => c.id === p.id)}
+                               />
+                            </div>
+                         ))}
+                      </div>
+                   </div>
+                </div>
+              )}
             </>
           )}
 
           {/* Fallback for other views to keep layout */}
           {view === ViewState.PRODUCTS && (
             <div className="py-4">
-               <h1 className="text-2xl font-bold mb-6 dark:text-white">All Products</h1>
-               <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                  {MOCK_PRODUCTS.map(p => (
-                     <ProductCardMinimal 
-                       key={p.id} 
-                       product={p} 
-                       onClick={() => handleProductClick(p)} 
-                       onAdd={() => addToCart(p)}
-                       onCompare={() => toggleCompare(p)}
-                       onQuickView={() => setQuickViewProduct(p)}
-                       isCompared={compareList.some(c => c.id === p.id)} 
-                     />
-                  ))}
+               <div className="flex items-center justify-between mb-6">
+                 <div>
+                   <h1 className="text-2xl font-bold dark:text-white">
+                     {activeCategory ? activeCategory : 'All Products'}
+                   </h1>
+                   <p className="text-sm text-gray-500">
+                     Showing {displayedProducts.length} items
+                     {searchQuery && ` for "${searchQuery}"`}
+                   </p>
+                 </div>
+                 {activeCategory && (
+                   <button 
+                     onClick={() => setActiveCategory(null)}
+                     className="flex items-center gap-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 px-3 py-1.5 rounded-lg transition-colors text-sm font-medium"
+                   >
+                     <X className="w-4 h-4" /> Clear Filter
+                   </button>
+                 )}
                </div>
+
+               {displayedProducts.length === 0 ? (
+                 <div className="flex flex-col items-center justify-center py-20 bg-gray-50 dark:bg-white/5 rounded-2xl">
+                    <Search className="w-12 h-12 text-gray-300 mb-4" />
+                    <h3 className="text-lg font-bold text-gray-500">No Products Found</h3>
+                    <p className="text-gray-400 text-sm">Try checking another category or clearing filters.</p>
+                 </div>
+               ) : (
+                 <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                    {displayedProducts.map(p => (
+                       <ProductCardMinimal 
+                         key={p.id} 
+                         product={p} 
+                         onClick={() => handleProductClick(p)} 
+                         onAdd={() => addToCart(p)}
+                         onCompare={() => toggleCompare(p)}
+                         onQuickView={() => setQuickViewProduct(p)}
+                         isCompared={compareList.some(c => c.id === p.id)} 
+                       />
+                    ))}
+                 </div>
+               )}
             </div>
           )}
 
@@ -575,6 +740,11 @@ const App = () => {
              onAddToCart={addToCart} 
           />
         )}
+        
+        {/* Auth Modal */}
+        {isAuthOpen && (
+           <AuthModal onClose={() => setIsAuthOpen(false)} onLogin={handleLogin} />
+        )}
 
         {/* Floating Compare Bar */}
         {compareList.length > 0 && view !== ViewState.COMPARE && (
@@ -594,46 +764,110 @@ const App = () => {
            </div>
         )}
 
-        <footer className="bg-gray-800 text-white pt-12 pb-6 mt-12">
-           <div className={`${CONTAINER_CLASS} grid grid-cols-1 md:grid-cols-4 gap-8 mb-8`}>
-              <div>
-                 <h3 className="font-bold text-lg mb-4">Customer Care</h3>
-                 <ul className="space-y-2 text-sm text-gray-400">
-                    <li>Help Center</li>
-                    <li>How to Buy</li>
-                    <li>Returns & Refunds</li>
-                    <li>Contact Us</li>
-                 </ul>
-              </div>
-              <div>
-                 <h3 className="font-bold text-lg mb-4">{APP_NAME}</h3>
-                 <ul className="space-y-2 text-sm text-gray-400">
-                    <li>About Us</li>
-                    <li>Digital Payments</li>
-                    <li>Rasel Card</li>
-                    <li>Blog</li>
-                 </ul>
-              </div>
-              <div>
-                 <h3 className="font-bold text-lg mb-4">Payment Methods</h3>
-                 <div className="flex gap-2 flex-wrap">
-                    <div className="w-12 h-8 bg-white rounded-sm"></div>
-                    <div className="w-12 h-8 bg-white rounded-sm"></div>
-                    <div className="w-12 h-8 bg-white rounded-sm"></div>
-                    <div className="w-12 h-8 bg-white rounded-sm"></div>
+        {/* Mega Footer */}
+        <footer className="bg-gray-900 text-gray-300 pt-16 pb-8 text-sm mt-12 border-t border-gray-800">
+           {/* Top: App Download */}
+           <div className={`${CONTAINER_CLASS} flex flex-col md:flex-row justify-between items-center mb-12 gap-6 bg-gray-800/50 p-6 rounded-2xl border border-gray-700`}>
+              <div className="flex items-center gap-4">
+                 <div className="w-12 h-12 bg-cyan-600 rounded-xl flex items-center justify-center text-white">
+                    <Smartphone className="w-7 h-7" />
+                 </div>
+                 <div>
+                    <h3 className="text-xl font-bold text-white">Shop Better on App</h3>
+                    <p className="text-gray-400 text-xs">Get exclusive deals & fast updates.</p>
                  </div>
               </div>
+              <div className="flex gap-4">
+                 <button className="flex items-center gap-2 bg-black border border-gray-600 px-4 py-2 rounded-lg hover:border-white transition-colors">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" className="h-8" alt="Play Store" />
+                 </button>
+                 <button className="flex items-center gap-2 bg-black border border-gray-600 px-4 py-2 rounded-lg hover:border-white transition-colors">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/3/3c/Download_on_the_App_Store_Badge.svg" className="h-8" alt="App Store" />
+                 </button>
+              </div>
+           </div>
+
+           {/* Middle: Links */}
+           <div className={`${CONTAINER_CLASS} grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 lg:gap-12 mb-12`}>
+              <div className="lg:col-span-1">
+                 <div className="flex items-center gap-2 mb-6 text-white">
+                     <div className="w-8 h-8 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-lg flex items-center justify-center font-bold">R</div>
+                     <span className="font-heading font-black text-xl">{APP_NAME}</span>
+                 </div>
+                 <div className="space-y-3 text-xs">
+                    <div className="flex items-start gap-3">
+                       <MapPin className="w-4 h-4 text-cyan-500 mt-0.5" />
+                       <span>Level 4, Bashundhara City,<br/>Panthapath, Dhaka-1215</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                       <Mail className="w-4 h-4 text-cyan-500" />
+                       <span>support@raselstore.bd</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                       <Phone className="w-4 h-4 text-cyan-500" />
+                       <span>+880 1712 345678</span>
+                    </div>
+                 </div>
+              </div>
+
               <div>
-                 <h3 className="font-bold text-lg mb-4">Follow Us</h3>
-                 <div className="flex gap-4">
-                    <Facebook className="w-6 h-6 text-gray-400 hover:text-white cursor-pointer" />
-                    <Instagram className="w-6 h-6 text-gray-400 hover:text-white cursor-pointer" />
-                    <Globe className="w-6 h-6 text-gray-400 hover:text-white cursor-pointer" />
+                 <h4 className="text-white font-bold mb-6">Customer Care</h4>
+                 <ul className="space-y-3 text-xs">
+                    <li className="hover:text-cyan-400 cursor-pointer">Help Center</li>
+                    <li className="hover:text-cyan-400 cursor-pointer">How to Buy</li>
+                    <li className="hover:text-cyan-400 cursor-pointer">Returns & Refunds</li>
+                    <li className="hover:text-cyan-400 cursor-pointer">Contact Us</li>
+                    <li className="hover:text-cyan-400 cursor-pointer">Terms & Conditions</li>
+                 </ul>
+              </div>
+
+              <div>
+                 <h4 className="text-white font-bold mb-6">Rasel Store</h4>
+                 <ul className="space-y-3 text-xs">
+                    <li className="hover:text-cyan-400 cursor-pointer">About Us</li>
+                    <li className="hover:text-cyan-400 cursor-pointer">Digital Payments</li>
+                    <li className="hover:text-cyan-400 cursor-pointer">Rasel Card</li>
+                    <li className="hover:text-cyan-400 cursor-pointer">Blog</li>
+                    <li className="hover:text-cyan-400 cursor-pointer">Privacy Policy</li>
+                 </ul>
+              </div>
+
+              <div>
+                 <h4 className="text-white font-bold mb-6">Payment Methods</h4>
+                 <div className="grid grid-cols-3 gap-2">
+                    <div className="bg-white p-1 rounded h-8 flex items-center justify-center"><span className="text-pink-600 font-bold text-[10px]">bKash</span></div>
+                    <div className="bg-white p-1 rounded h-8 flex items-center justify-center"><span className="text-orange-600 font-bold text-[10px]">Nagad</span></div>
+                    <div className="bg-white p-1 rounded h-8 flex items-center justify-center"><CreditCard className="text-gray-600 w-4 h-4" /></div>
+                    <div className="bg-white p-1 rounded h-8 flex items-center justify-center"><span className="text-blue-800 font-bold text-[10px]">VISA</span></div>
+                    <div className="bg-white p-1 rounded h-8 flex items-center justify-center"><span className="text-red-600 font-bold text-[10px]">MC</span></div>
+                    <div className="bg-white p-1 rounded h-8 flex items-center justify-center"><span className="text-gray-800 font-bold text-[10px]">COD</span></div>
+                 </div>
+              </div>
+              
+              <div>
+                 <h4 className="text-white font-bold mb-6">Newsletter</h4>
+                 <p className="text-xs mb-4">Subscribe to get new offers!</p>
+                 <div className="flex gap-2">
+                    <input type="email" placeholder="Your Email" className="bg-gray-800 border border-gray-700 text-white px-3 py-2 rounded-lg w-full text-xs focus:border-cyan-500 outline-none" />
+                    <button className="bg-cyan-600 p-2 rounded-lg hover:bg-cyan-700 text-white"><Send className="w-4 h-4" /></button>
+                 </div>
+                 <div className="mt-6 flex gap-4">
+                    <Facebook className="w-5 h-5 text-gray-400 hover:text-white cursor-pointer transition-colors" />
+                    <Instagram className="w-5 h-5 text-gray-400 hover:text-white cursor-pointer transition-colors" />
+                    <Youtube className="w-5 h-5 text-gray-400 hover:text-white cursor-pointer transition-colors" />
+                    <Linkedin className="w-5 h-5 text-gray-400 hover:text-white cursor-pointer transition-colors" />
                  </div>
               </div>
            </div>
-           <div className="text-center text-xs text-gray-500 border-t border-gray-700 pt-6">
-              &copy; 2024 {APP_NAME} Ltd. All rights reserved.
+
+           {/* Bottom */}
+           <div className={`${CONTAINER_CLASS} pt-8 border-t border-gray-800 flex flex-col md:flex-row justify-between items-center text-xs text-gray-500 gap-4`}>
+              <p>&copy; 2024 {APP_NAME} Limited. All rights reserved.</p>
+              <div className="flex items-center gap-2">
+                 <span>Made with</span>
+                 <Flame className="w-3 h-3 text-red-500 fill-red-500" />
+                 <span>in Bangladesh</span>
+              </div>
            </div>
         </footer>
 

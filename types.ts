@@ -28,6 +28,13 @@ export interface UserContext {
   theme: 'light' | 'dark';
 }
 
+export interface UserProfile {
+  id: string;
+  name: string;
+  email: string;
+  avatar?: string;
+}
+
 export enum ViewState {
   HOME = 'HOME',
   PRODUCTS = 'PRODUCTS',
