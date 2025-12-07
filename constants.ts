@@ -9,6 +9,22 @@ export const CATEGORIES = [
   { id: 'c4', name: 'Smart Home', slug: 'home', gradient: 'from-emerald-400 to-green-600' }
 ];
 
+export const SERVICE_FEATURES = [
+  { id: 's1', title: 'Free Shipping', desc: 'On orders over 5k BDT', icon: 'Truck' },
+  { id: 's2', title: 'Money Guarantee', desc: '30 days money back', icon: 'ShieldCheck' },
+  { id: 's3', title: 'Online Support', desc: '24/7 technical aid', icon: 'Headphones' },
+  { id: 's4', title: 'Secure Payment', desc: 'Encrypted transactions', icon: 'Lock' },
+];
+
+export const BRANDS = [
+  { name: 'Samsung', url: 'https://upload.wikimedia.org/wikipedia/commons/2/24/Samsung_Logo.svg' },
+  { name: 'Apple', url: 'https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg' },
+  { name: 'Sony', url: 'https://upload.wikimedia.org/wikipedia/commons/c/c3/Sony_logo.svg' },
+  { name: 'Asus', url: 'https://upload.wikimedia.org/wikipedia/commons/2/2e/ASUS_Logo.svg' },
+  { name: 'Intel', url: 'https://upload.wikimedia.org/wikipedia/commons/c/c9/Intel-logo.svg' },
+  { name: 'Nvidia', url: 'https://upload.wikimedia.org/wikipedia/commons/2/21/Nvidia_logo.svg' }
+];
+
 export const MOCK_PRODUCTS: Product[] = [
   {
     id: 'p1',

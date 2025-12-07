@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ShoppingBag, Search, Menu, Sun, Moon, Zap, User, ArrowRight, Truck, ShieldCheck, Cpu, Mail, MapPin, Phone, Globe, Instagram, Facebook, Twitter, X, Clock, Coffee, Sparkles, Play, Star, Plus, Flame, TrendingUp, Gift } from 'lucide-react';
-import { MOCK_PRODUCTS, SUGGESTED_QUERIES, APP_NAME, CATEGORIES } from './constants';
+import { ShoppingBag, Search, Menu, Sun, Moon, Zap, User, ArrowRight, Truck, ShieldCheck, Cpu, Mail, MapPin, Phone, Globe, Instagram, Facebook, Twitter, X, Clock, Coffee, Sparkles, Play, Star, Plus, Flame, TrendingUp, Gift, Headphones, Lock, ChevronRight, ChevronLeft } from 'lucide-react';
+import { MOCK_PRODUCTS, SUGGESTED_QUERIES, APP_NAME, CATEGORIES, SERVICE_FEATURES, BRANDS } from './constants';
 import { Product, CartItem, UserContext, ViewState } from './types';
 import { Copilot } from './components/Copilot';
 import { OneSlideCheckout } from './components/OneSlideCheckout';
@@ -8,13 +8,59 @@ import { Product3DViewer } from './components/Product3DViewer';
 
 // --- Sub-Components ---
 
-const FeatureCard = ({ icon: Icon, title, desc }: { icon: any, title: string, desc: string }) => (
-  <div className="p-6 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition-colors group cursor-default backdrop-blur-sm">
-    <div className="w-12 h-12 bg-cyan-900/30 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-[0_0_15px_rgba(6,182,212,0.3)]">
-      <Icon className="w-6 h-6 text-cyan-400" />
+const ServiceBar = () => (
+  <div className="bg-black/40 border-y border-white/10 backdrop-blur-md">
+    <div className="max-w-7xl mx-auto px-6 py-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      {SERVICE_FEATURES.map((feature) => {
+        const Icon = feature.icon === 'Truck' ? Truck : feature.icon === 'ShieldCheck' ? ShieldCheck : feature.icon === 'Headphones' ? Headphones : Lock;
+        return (
+          <div key={feature.id} className="flex items-center gap-4 group">
+             <div className="w-12 h-12 rounded-full bg-cyan-900/20 border border-cyan-500/20 flex items-center justify-center group-hover:bg-cyan-500/20 transition-colors">
+                <Icon className="w-6 h-6 text-cyan-400 group-hover:scale-110 transition-transform" />
+             </div>
+             <div>
+                <h4 className="font-bold text-white uppercase text-sm tracking-wider">{feature.title}</h4>
+                <p className="text-gray-500 text-xs">{feature.desc}</p>
+             </div>
+          </div>
+        );
+      })}
     </div>
-    <h3 className="text-xl font-bold mb-2 text-white font-heading">{title}</h3>
-    <p className="text-gray-400 text-sm leading-relaxed">{desc}</p>
+  </div>
+);
+
+const BannerGrid = () => (
+  <div className="max-w-7xl mx-auto px-6 py-12 grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div className="relative h-64 rounded-2xl overflow-hidden group cursor-pointer border border-white/10">
+      <img src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=2070" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-80" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex flex-col justify-end p-6">
+         <span className="text-cyan-400 font-bold uppercase tracking-widest text-xs mb-2">Cyber Sale</span>
+         <h3 className="text-2xl font-bold text-white leading-tight">Neural <br/>Implants</h3>
+         <div className="mt-4 flex items-center gap-2 text-white/80 text-sm group-hover:text-cyan-400 transition-colors">
+            Shop Now <ArrowRight className="w-4 h-4" />
+         </div>
+      </div>
+    </div>
+    <div className="relative h-64 rounded-2xl overflow-hidden group cursor-pointer border border-white/10">
+      <img src="https://images.unsplash.com/photo-1617791160505-6f00504e3caf?q=80&w=2070" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-80" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex flex-col justify-end p-6">
+         <span className="text-purple-400 font-bold uppercase tracking-widest text-xs mb-2">New Arrival</span>
+         <h3 className="text-2xl font-bold text-white leading-tight">Smart <br/>Wearables</h3>
+         <div className="mt-4 flex items-center gap-2 text-white/80 text-sm group-hover:text-purple-400 transition-colors">
+            Explore <ArrowRight className="w-4 h-4" />
+         </div>
+      </div>
+    </div>
+    <div className="relative h-64 rounded-2xl overflow-hidden group cursor-pointer border border-white/10">
+      <img src="https://images.unsplash.com/photo-1555255707-c07966088b7b?q=80&w=2070" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-80" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex flex-col justify-end p-6">
+         <span className="text-orange-400 font-bold uppercase tracking-widest text-xs mb-2">Hot Deal</span>
+         <h3 className="text-2xl font-bold text-white leading-tight">Home <br/>Automation</h3>
+         <div className="mt-4 flex items-center gap-2 text-white/80 text-sm group-hover:text-orange-400 transition-colors">
+            View Offers <ArrowRight className="w-4 h-4" />
+         </div>
+      </div>
+    </div>
   </div>
 );
 
@@ -150,11 +196,19 @@ const App = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [scrollY, setScrollY] = useState(0);
+  const [activeTab, setActiveTab] = useState<'new' | 'best' | 'trending'>('new');
   const [userContext, setUserContext] = useState<UserContext>({
     timeOfDay: 'afternoon',
     location: 'Dhaka',
     deviceType: 'desktop'
   });
+
+  // Haptic Feedback Helper
+  const triggerHaptic = () => {
+    if (typeof navigator !== 'undefined' && navigator.vibrate) {
+      navigator.vibrate(5); // Subtle tick
+    }
+  };
 
   // Adaptivity Logic: Set theme based on time
   useEffect(() => {
@@ -186,6 +240,7 @@ const App = () => {
   };
 
   const addToCart = (product: Product) => {
+    triggerHaptic();
     setCart(prev => {
       const existing = prev.find(item => item.id === product.id);
       if (existing) {
@@ -222,7 +277,13 @@ const App = () => {
   };
 
   const isMorning = userContext.timeOfDay === 'morning';
-  const isEvening = userContext.timeOfDay === 'evening' || userContext.timeOfDay === 'night';
+
+  // Filter products for tabs
+  const getTabProducts = () => {
+    if (activeTab === 'new') return [...MOCK_PRODUCTS].reverse();
+    if (activeTab === 'best') return MOCK_PRODUCTS.filter(p => p.rating >= 4.7);
+    return MOCK_PRODUCTS; // trending
+  };
 
   return (
     <div 
@@ -287,38 +348,26 @@ const App = () => {
       </header>
 
       {/* Main Content Area */}
-      <main className="flex-1 relative z-10 w-full max-w-7xl mx-auto flex flex-col">
+      <main className="flex-1 relative z-10 w-full flex flex-col">
         
         {/* --- HOME VIEW (Adaptive Landing) --- */}
         {view === ViewState.HOME && (
-          <div className="animate-fade-in">
-            {/* Contextual Banner */}
-            <div className={`w-full py-2 flex justify-center items-center gap-2 text-xs font-bold tracking-widest uppercase ${isMorning ? 'bg-orange-500/10 text-orange-300' : 'bg-purple-500/10 text-purple-300'}`}>
-               {isMorning ? <Sun className="w-3 h-3" /> : <Moon className="w-3 h-3" />}
-               {isMorning ? "Morning Edition • Fresh Deals Loaded" : "Evening Mode • Relax & Shop"}
-            </div>
-
+          <div className="animate-fade-in w-full">
+            
             {/* Parallax Hero Section */}
-            <section className="relative min-h-[90vh] flex items-center px-6 md:px-16 overflow-hidden">
-               
-               {/* Fixed Background with Parallax */}
+            <section className="relative h-[80vh] md:h-[90vh] flex items-center px-6 md:px-16 overflow-hidden">
                <div className="absolute inset-0 z-0 overflow-hidden">
                   <div 
                     className="absolute inset-0 bg-cover bg-center transition-transform duration-75 ease-linear will-change-transform"
                     style={{ 
                       backgroundImage: `url(${isMorning ? 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=2070' : 'https://images.unsplash.com/photo-1515630278258-407f66498911?q=80&w=2098'})`,
-                      transform: `translateY(${scrollY * 0.5}px) scale(1.1)`, // Parallax Movement
+                      transform: `translateY(${scrollY * 0.5}px) scale(1.1)`, 
                     }}
                   ></div>
                   <div className="absolute inset-0 bg-gradient-to-r from-black via-black/80 to-transparent z-10"></div>
                   <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black z-10"></div>
-                  
-                  {/* Subtle video overlay for movement */}
-                   <video 
-                    autoPlay 
-                    loop 
-                    muted 
-                    playsInline 
+                  <video 
+                    autoPlay loop muted playsInline 
                     className="absolute inset-0 w-full h-full object-cover opacity-20 mix-blend-screen"
                   >
                      <source src="https://cdn.pixabay.com/video/2020/05/25/40156-424930030_large.mp4" type="video/mp4" />
@@ -326,7 +375,7 @@ const App = () => {
                </div>
 
                {/* Hero Content */}
-               <div className="w-full grid grid-cols-1 lg:grid-cols-2 gap-12 items-center z-10 pt-8 lg:pt-0">
+               <div className="w-full max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center z-10">
                   <div className="space-y-8 animate-fade-in-up" style={{ transform: `translateY(${-scrollY * 0.2}px)` }}>
                      <div className={`inline-flex items-center gap-2 px-4 py-1.5 border backdrop-blur-md rounded-full text-xs font-bold tracking-wider ${
                        isMorning 
@@ -336,15 +385,11 @@ const App = () => {
                         <Sparkles className="w-3 h-3 animate-pulse" /> {isMorning ? "START YOUR DAY SMART" : "FUTURE READY GEAR"}
                      </div>
                      
-                     <h1 className="text-5xl md:text-7xl font-black leading-none font-heading text-shadow-lg">
+                     <h1 className="text-5xl md:text-7xl lg:text-8xl font-black leading-none font-heading relative z-20">
                         {isMorning ? (
-                          <>
-                            Wake Up <br/> to <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-pink-500 drop-shadow-[0_0_25px_rgba(251,146,60,0.6)]">Innovation.</span>
-                          </>
+                          <>Wake Up <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-pink-500">Innovation</span></>
                         ) : (
-                          <>
-                            Experience <br/> <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-600 drop-shadow-[0_0_35px_rgba(34,211,238,0.5)]">Adaptive</span> Reality.
-                          </>
+                          <>Adaptive <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-600">Reality</span></>
                         )}
                      </h1>
                      
@@ -357,167 +402,110 @@ const App = () => {
                      
                      <div className="flex flex-wrap gap-4 pt-4">
                        <button 
-                        onClick={() => setView(ViewState.PRODUCTS)} 
-                        className={`
-                          relative overflow-hidden group text-black font-bold py-4 px-10 rounded-full shadow-[0_0_20px_rgba(255,255,255,0.3)] 
-                          ${isMorning ? 'bg-white hover:bg-orange-50' : 'bg-white hover:bg-cyan-50'}
-                          transition-all duration-300 hover:scale-105 hover:shadow-[0_0_40px_rgba(255,255,255,0.5)]
-                        `}
+                        onMouseEnter={triggerHaptic}
+                        onClick={() => { triggerHaptic(); setView(ViewState.PRODUCTS); }} 
+                        className={`relative overflow-hidden group text-black font-bold py-4 px-10 rounded-full shadow-[0_0_20px_rgba(255,255,255,0.3)] ${isMorning ? 'bg-white hover:bg-orange-50' : 'bg-white hover:bg-cyan-50'} transition-all`}
                        >
                          <span className="relative z-10 flex items-center gap-2">
-                           {isMorning ? "Shop Fresh Deals" : "Shop Collection"}
-                           <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                           Shop Collection <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                          </span>
                        </button>
-                       <button onClick={() => setView(ViewState.ABOUT)} className="border border-white/30 backdrop-blur-md text-white font-bold py-4 px-10 rounded-full hover:bg-white/10 transition-colors flex items-center gap-2 hover:border-cyan-400/50">
-                         Explore Rasel Store 
-                       </button>
                      </div>
                   </div>
                   
-                  {/* Hero Visual - Parallax */}
-                  <div 
-                    className="relative h-[450px] md:h-[650px] w-full hidden lg:block perspective-1000"
-                    style={{
-                      transform: `translateY(${scrollY * 0.1}px) perspective(1000px) rotateX(${mousePos.y * 2}deg) rotateY(${mousePos.x * 2}deg)`
-                    }}
-                  >
-                     <div className={`absolute inset-0 bg-gradient-to-tr rounded-[3rem] blur-3xl animate-pulse-slow ${isMorning ? 'from-orange-500/20 to-pink-500/20' : 'from-cyan-500/20 to-purple-500/20'}`}></div>
+                  {/* Hero Visual */}
+                  <div className="relative h-[450px] md:h-[600px] w-full hidden lg:block perspective-1000" style={{ transform: `perspective(1000px) rotateX(${mousePos.y}deg) rotateY(${mousePos.x}deg)` }}>
+                     <img 
+                       src={isMorning ? "https://picsum.photos/id/103/800/800" : "https://picsum.photos/id/338/800/800"}
+                       className="absolute inset-0 w-full h-full object-cover rounded-[3rem] shadow-2xl border border-white/10 opacity-90 animate-float"
+                     />
+                  </div>
+               </div>
+            </section>
+
+            {/* 2. Service Features Bar */}
+            <ServiceBar />
+
+            {/* 3. Promotional Banners (3 Columns) */}
+            <BannerGrid />
+
+            {/* 4. Hot Deal + Catalog Section (Mixed Layout) */}
+            <section className="max-w-7xl mx-auto px-6 py-12">
+               <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                  
+                  {/* Hot Deal Sidebar */}
+                  <div className="lg:col-span-1 bg-gradient-to-br from-red-600 to-rose-700 rounded-3xl p-8 text-white relative overflow-hidden group shadow-[0_0_30px_rgba(225,29,72,0.4)] flex flex-col">
+                     <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20"></div>
+                     <span className="relative z-10 bg-white text-red-600 px-3 py-1 text-xs font-bold uppercase tracking-widest rounded-full w-fit mb-4 animate-pulse">Hot Deal</span>
+                     <h3 className="relative z-10 text-3xl font-black font-heading mb-2">FLASH <br/>SALE</h3>
+                     <p className="relative z-10 text-rose-100 text-sm mb-6">Up to 70% off on selected cyberware items.</p>
                      
-                     {/* Floating Cards Effect */}
-                     <div className="relative w-full h-full transition-transform duration-100 ease-out">
-                        <img 
-                          src={isMorning ? "https://picsum.photos/id/103/800/800" : "https://picsum.photos/id/338/800/800"}
-                          className="absolute inset-0 w-full h-full object-cover rounded-[3rem] shadow-2xl border border-white/10 opacity-90 animate-float z-10"
-                          alt="Hero Visual"
-                        />
-                        
-                        <div 
-                          className="absolute top-20 -right-8 bg-black/60 backdrop-blur-xl border border-white/10 p-4 rounded-2xl flex items-center gap-3 shadow-xl z-20 animate-float" 
-                          style={{ animationDelay: '1s', transform: `translateZ(50px)` }}
-                        >
-                            <div className="bg-cyan-500/20 p-2 rounded-full"><Zap className="text-cyan-400 w-5 h-5 animate-pulse" /></div>
-                            <div>
-                              <p className="text-white text-sm font-bold">New Arrival</p>
-                              <p className="text-xs text-gray-400">CyberWeave v2</p>
-                            </div>
+                     <div className="relative z-10 mt-auto">
+                        <div className="flex gap-2 mb-6">
+                           <div className="bg-black/20 backdrop-blur-md rounded-lg p-3 text-center flex-1">
+                              <span className="block text-2xl font-bold">02</span>
+                              <span className="text-[10px] uppercase opacity-70">Days</span>
+                           </div>
+                           <div className="bg-black/20 backdrop-blur-md rounded-lg p-3 text-center flex-1">
+                              <span className="block text-2xl font-bold">14</span>
+                              <span className="text-[10px] uppercase opacity-70">Hrs</span>
+                           </div>
+                           <div className="bg-black/20 backdrop-blur-md rounded-lg p-3 text-center flex-1">
+                              <span className="block text-2xl font-bold">59</span>
+                              <span className="text-[10px] uppercase opacity-70">Mins</span>
+                           </div>
                         </div>
+                        <img src={MOCK_PRODUCTS[1].images[0]} className="w-full h-48 object-cover rounded-xl mb-4 border border-white/20" />
+                        <button onClick={() => setView(ViewState.PRODUCTS)} className="w-full bg-white text-red-600 font-bold py-3 rounded-xl hover:bg-gray-100 transition-colors shadow-lg">View Deal</button>
+                     </div>
+                  </div>
 
-                        <div 
-                          className="absolute bottom-20 -left-8 bg-black/60 backdrop-blur-xl border border-white/10 p-4 rounded-2xl flex items-center gap-3 shadow-xl z-20 animate-float" 
-                          style={{ animationDelay: '2s', transform: `translateZ(30px)` }}
-                        >
-                            <div className="bg-green-500/20 p-2 rounded-full"><ShieldCheck className="text-green-400 w-5 h-5" /></div>
-                            <div>
-                              <p className="text-white text-sm font-bold">Carbon Neutral</p>
-                              <p className="text-xs text-gray-400">Verified</p>
-                            </div>
+                  {/* Tabbed Product Grid */}
+                  <div className="lg:col-span-3">
+                     <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
+                        <h2 className="text-3xl font-bold font-heading">Weekly Showcase</h2>
+                        <div className="flex p-1 bg-white/5 border border-white/10 rounded-xl backdrop-blur-md">
+                           {['new', 'best', 'trending'].map((tab) => (
+                              <button 
+                                key={tab}
+                                onClick={() => setActiveTab(tab as any)}
+                                className={`px-6 py-2 rounded-lg text-sm font-bold capitalize transition-all ${activeTab === tab ? 'bg-cyan-600 text-white shadow-lg' : 'text-gray-400 hover:text-white'}`}
+                              >
+                                {tab === 'new' ? 'New Arrivals' : tab === 'best' ? 'Best Sellers' : 'Trending'}
+                              </button>
+                           ))}
                         </div>
+                     </div>
+                     
+                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {getTabProducts().slice(0, 6).map((product) => (
+                           <ProductCard 
+                             key={product.id} 
+                             product={product} 
+                             onClick={() => handleProductClick(product)}
+                             onAddToCart={(e) => handleAddToCartClick(e, product)}
+                             isMorning={isMorning}
+                           />
+                        ))}
+                     </div>
+                     
+                     <div className="mt-8 text-center">
+                        <button onClick={() => setView(ViewState.PRODUCTS)} className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors border-b border-transparent hover:border-cyan-400 pb-1">
+                           View All Products <ArrowRight className="w-4 h-4" />
+                        </button>
                      </div>
                   </div>
                </div>
             </section>
 
-            {/* Shop by Category Section */}
-            <section className="px-6 md:px-16 py-20 bg-black relative z-10">
-               <div className="flex items-end justify-between mb-12">
-                  <h2 className="text-3xl md:text-4xl font-black text-white font-heading">Shop by Category</h2>
-                  <button onClick={() => setView(ViewState.PRODUCTS)} className="text-cyan-400 font-bold text-sm hover:underline">View All</button>
+            {/* 5. Brand Carousel */}
+            <section className="bg-white/5 border-y border-white/10 py-12 overflow-hidden">
+               <div className="max-w-7xl mx-auto px-6 mb-8 text-center">
+                  <h3 className="text-gray-500 font-bold uppercase tracking-widest text-sm">Trusted Partners</h3>
                </div>
-               <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                 {CATEGORIES.map((cat) => (
-                    <div 
-                      key={cat.id} 
-                      onClick={() => setView(ViewState.PRODUCTS)}
-                      className={`relative overflow-hidden rounded-3xl h-48 cursor-pointer group border border-white/5 hover:border-white/20 transition-all`}
-                    >
-                       <div className={`absolute inset-0 bg-gradient-to-br ${cat.gradient} opacity-20 group-hover:opacity-40 transition-opacity`}></div>
-                       <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center z-10">
-                          <h3 className="text-xl font-bold text-white mb-2">{cat.name}</h3>
-                          <span className="w-8 h-1 bg-white/50 rounded-full group-hover:w-16 transition-all"></span>
-                       </div>
-                    </div>
-                 ))}
-               </div>
-            </section>
-
-            {/* Trending Products */}
-            <section className="px-6 md:px-16 py-20 bg-gradient-to-b from-gray-900 to-black border-t border-white/5">
-               <div className="flex items-center gap-3 mb-12">
-                  <div className="p-3 bg-red-500/20 rounded-full"><Flame className="w-6 h-6 text-red-500" /></div>
-                  <h2 className="text-3xl md:text-5xl font-black text-white font-heading">Trending Now</h2>
-               </div>
-               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                  {MOCK_PRODUCTS.slice(0, 4).map((product) => (
-                    <ProductCard 
-                      key={product.id} 
-                      product={product} 
-                      onClick={() => handleProductClick(product)}
-                      onAddToCart={(e) => handleAddToCartClick(e, product)}
-                      isMorning={isMorning}
-                    />
-                  ))}
-               </div>
-            </section>
-
-            {/* Promotional Banner */}
-            <section className="py-20 px-6">
-               <div className="max-w-7xl mx-auto relative rounded-[3rem] overflow-hidden min-h-[400px] flex items-center bg-gradient-to-r from-purple-900 to-indigo-900">
-                  <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/hexellence.png')] opacity-20"></div>
-                  <img src="https://images.unsplash.com/photo-1620799140408-ed5341cd2431?q=80&w=2072" className="absolute right-0 top-0 w-1/2 h-full object-cover opacity-50 mix-blend-overlay hidden md:block" />
-                  
-                  <div className="relative z-10 p-12 md:p-24 max-w-2xl">
-                     <span className="inline-block px-4 py-2 bg-yellow-400 text-black font-black uppercase tracking-widest text-xs rounded-full mb-6 animate-pulse">Limited Time Offer</span>
-                     <h2 className="text-5xl md:text-7xl font-black text-white font-heading mb-6 leading-none">CYBER <br/>WEEK SALE</h2>
-                     <p className="text-purple-200 text-xl mb-8 font-light">Get up to <span className="font-bold text-white">40% OFF</span> on all neural interfaces and smart wearables. The future is on sale.</p>
-                     <div className="flex gap-4">
-                        <button onClick={() => setView(ViewState.PRODUCTS)} className="bg-white text-purple-900 font-bold py-4 px-10 rounded-xl hover:scale-105 transition-transform shadow-xl">Shop Sale</button>
-                        <div className="flex items-center gap-2 text-white/80 px-6 py-4 border border-white/20 rounded-xl">
-                           <Clock className="w-5 h-5" /> 
-                           <span className="font-mono">23:59:59</span>
-                        </div>
-                     </div>
-                  </div>
-               </div>
-            </section>
-
-            {/* Best Sellers */}
-            <section className="px-6 md:px-16 py-20 bg-black">
-               <div className="flex items-center gap-3 mb-12">
-                  <div className="p-3 bg-yellow-500/20 rounded-full"><TrendingUp className="w-6 h-6 text-yellow-500" /></div>
-                  <h2 className="text-3xl md:text-5xl font-black text-white font-heading">Best Sellers</h2>
-               </div>
-               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                  {MOCK_PRODUCTS.slice(2, 6).map((product) => (
-                    <ProductCard 
-                      key={product.id} 
-                      product={product} 
-                      onClick={() => handleProductClick(product)}
-                      onAddToCart={(e) => handleAddToCartClick(e, product)}
-                      isMorning={isMorning}
-                    />
-                  ))}
-               </div>
-            </section>
-
-             {/* New Arrivals */}
-            <section className="px-6 md:px-16 py-20 bg-gradient-to-t from-gray-900 to-black">
-               <div className="flex items-center justify-between mb-12">
-                  <div className="flex items-center gap-3">
-                     <div className="p-3 bg-green-500/20 rounded-full"><Sparkles className="w-6 h-6 text-green-500" /></div>
-                     <h2 className="text-3xl md:text-5xl font-black text-white font-heading">New Arrivals</h2>
-                  </div>
-                  <button onClick={() => setView(ViewState.PRODUCTS)} className="hidden md:flex items-center gap-2 border border-white/20 px-6 py-2 rounded-full hover:bg-white/10 transition-colors">See All <ArrowRight className="w-4 h-4"/></button>
-               </div>
-               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                  {[...MOCK_PRODUCTS].reverse().slice(0, 4).map((product) => (
-                    <ProductCard 
-                      key={product.id} 
-                      product={product} 
-                      onClick={() => handleProductClick(product)}
-                      onAddToCart={(e) => handleAddToCartClick(e, product)}
-                      isMorning={isMorning}
-                    />
+               <div className="flex justify-center gap-12 md:gap-24 flex-wrap px-6 items-center opacity-50 grayscale hover:grayscale-0 transition-all duration-500">
+                  {BRANDS.map((brand, idx) => (
+                     <img key={idx} src={brand.url} alt={brand.name} className="h-8 md:h-12 w-auto object-contain hover:scale-110 transition-transform cursor-pointer" />
                   ))}
                </div>
             </section>
