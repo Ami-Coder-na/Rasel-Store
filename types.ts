@@ -24,6 +24,7 @@ export interface UserContext {
   timeOfDay: 'morning' | 'afternoon' | 'evening' | 'night';
   location: string;
   deviceType: 'mobile' | 'desktop';
+  theme: 'light' | 'dark';
 }
 
 export enum ViewState {
