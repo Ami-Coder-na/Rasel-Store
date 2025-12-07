@@ -13,6 +13,8 @@ export interface Product {
   arEnabled: boolean;
   stock: number;
   carbonFootprint: string; // e.g., "Low", "Neutral"
+  colors?: string[]; // Hex codes or names
+  sizes?: string[]; // e.g., S, M, L, XL or Storage sizes
 }
 
 export interface CartItem extends Product {
@@ -32,7 +34,30 @@ export interface UserProfile {
   id: string;
   name: string;
   email: string;
+  phone?: string;
   avatar?: string;
+  joinDate?: string;
+  address?: string;
+}
+
+export type OrderStatus = 'Processing' | 'Shipped' | 'Delivered' | 'Cancelled';
+
+export interface Order {
+  id: string;
+  date: string;
+  total: number;
+  status: OrderStatus;
+  items: CartItem[];
+  paymentMethod: string;
+  trackingNumber?: string;
+}
+
+export interface ActivityLog {
+  id: string;
+  action: string;
+  description: string;
+  timestamp: string;
+  icon: 'login' | 'security' | 'order' | 'edit';
 }
 
 export enum ViewState {
@@ -43,7 +68,8 @@ export enum ViewState {
   AR_VIEW = 'AR_VIEW',
   ABOUT = 'ABOUT',
   CONTACT = 'CONTACT',
-  COMPARE = 'COMPARE'
+  COMPARE = 'COMPARE',
+  PROFILE = 'PROFILE'
 }
 
 export interface ChatMessage {

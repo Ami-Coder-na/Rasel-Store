@@ -9,6 +9,8 @@ import { Product3DViewer } from './components/Product3DViewer';
 import { CompareView } from './components/CompareView';
 import { QuickViewModal } from './components/QuickViewModal';
 import { AuthModal } from './components/AuthModal';
+import { ProductDetail } from './components/ProductDetail';
+import { UserProfileView } from './components/UserProfileView';
 
 // --- Layout Constants ---
 const CONTAINER_CLASS = "max-w-[1400px] mx-auto px-4 lg:px-6";
@@ -184,6 +186,48 @@ const ProductCardMinimal: React.FC<{
   </div>
 );
 
+const SplashOffer = ({ onClick }: { onClick: () => void }) => (
+  <div onClick={onClick} className="mb-12 relative rounded-2xl overflow-hidden shadow-2xl group cursor-pointer border border-white/10 h-[300px] md:h-[400px]">
+    {/* Background */}
+    <div className="absolute inset-0">
+      <img 
+        src="https://images.unsplash.com/photo-1535295972055-1c762f4483e5?q=80&w=2000" 
+        className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" 
+        alt="Splash Offer"
+      />
+      <div className="absolute inset-0 bg-gradient-to-r from-black via-black/60 to-transparent/20"></div>
+    </div>
+
+    {/* Content */}
+    <div className="absolute inset-0 flex flex-col justify-center px-6 md:px-16 max-w-3xl">
+       <div className="flex items-center gap-2 mb-4 animate-fade-in-up">
+          <span className="px-3 py-1 bg-orange-500 text-white text-[10px] font-bold uppercase tracking-wider rounded-sm">Mega Deal</span>
+          <span className="text-cyan-400 text-xs font-bold uppercase tracking-widest flex items-center gap-1">
+             <Zap className="w-3 h-3 fill-current" /> Limited Time Only
+          </span>
+       </div>
+
+       <h2 className="text-4xl md:text-6xl font-black text-white leading-none mb-6 font-heading animate-fade-in-up" style={{animationDelay: '100ms'}}>
+         CYBER <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-500">MONDAY</span> <br/>
+         IS LIVE NOW
+       </h2>
+
+       <p className="text-gray-300 text-sm md:text-lg mb-8 max-w-xl leading-relaxed animate-fade-in-up" style={{animationDelay: '200ms'}}>
+         Get up to <span className="text-white font-bold">70% OFF</span> on top-tier tech, neural chips, and gravity-defying gear. 
+         Don't miss the future of savings.
+       </p>
+
+       <button className="w-fit bg-white text-black font-bold py-3 md:py-4 px-8 md:px-10 rounded-full hover:bg-cyan-400 hover:scale-105 transition-all shadow-[0_0_30px_rgba(255,255,255,0.2)] animate-fade-in-up" style={{animationDelay: '300ms'}}>
+         Grab the Deal
+       </button>
+    </div>
+
+    {/* Abstract Shapes */}
+    <div className="absolute -bottom-10 -right-10 w-64 h-64 bg-cyan-500/20 rounded-full blur-3xl group-hover:bg-cyan-500/30 transition-colors"></div>
+  </div>
+);
+
+
 // --- Main Components ---
 
 const HERO_SLIDES = [
@@ -231,14 +275,21 @@ const App = () => {
     localStorage.setItem('rasel_recently_viewed', JSON.stringify(recentlyViewed));
   }, [recentlyViewed]);
 
-  const addToCart = (product: Product) => {
+  const addToCart = (product: Product | CartItem) => {
     setCart(prev => {
       const existing = prev.find(item => item.id === product.id);
       if (existing) {
-        return prev.map(item => item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item);
+        // If it's a CartItem (has quantity from PDP), add that amount. otherwise add 1.
+        const qtyToAdd = (product as CartItem).quantity || 1;
+        return prev.map(item => item.id === product.id ? { ...item, quantity: item.quantity + qtyToAdd } : item);
       }
-      return [...prev, { ...product, quantity: 1 }];
+      return [...prev, { ...product, quantity: (product as CartItem).quantity || 1 }];
     });
+  };
+
+  const handleBuyNow = (item: CartItem) => {
+    addToCart(item);
+    setView(ViewState.CART_CHECKOUT);
   };
 
   const toggleCompare = (product: Product) => {
@@ -276,6 +327,7 @@ const App = () => {
 
   const handleLogout = () => {
     setCurrentUser(null);
+    setView(ViewState.HOME);
   };
 
   const handleCategorySelect = (categoryName: string) => {
@@ -292,7 +344,7 @@ const App = () => {
       filtered = filtered.filter(p => {
         const cat = activeCategory.toLowerCase();
         // Simple mapping/matching logic for demo
-        if (cat.includes('fashion') || cat.includes('apparel')) return p.category === 'Apparel';
+        if (cat.includes('fashion') || cat.includes('apparel') || cat.includes('sales')) return p.category === 'Apparel';
         if (cat.includes('phone') || cat.includes('laptop') || cat.includes('tech') || cat.includes('camera') || cat.includes('drone')) return p.category === 'Tech';
         if (cat.includes('audio')) return p.category === 'Audio';
         if (cat.includes('gaming')) return p.category === 'Gaming';
@@ -358,7 +410,7 @@ const App = () => {
                {/* User Auth Trigger */}
                <div className="flex items-center gap-2 cursor-pointer group relative">
                   {currentUser ? (
-                    <div className="flex items-center gap-2" onClick={handleLogout} title="Click to Logout">
+                    <div className="flex items-center gap-2" onClick={() => setView(ViewState.PROFILE)} title="My Account">
                       <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-cyan-500">
                         {currentUser.avatar ? (
                           <img src={currentUser.avatar} alt="User" className="w-full h-full object-cover" />
@@ -370,7 +422,6 @@ const App = () => {
                         <p className="text-[10px] text-gray-400">Hello,</p>
                         <p className="text-xs font-bold leading-none truncate max-w-[80px]">{currentUser.name}</p>
                       </div>
-                      <LogOut className="w-4 h-4 text-gray-400 hover:text-red-500 ml-1" />
                     </div>
                   ) : (
                     <div className="flex items-center gap-2" onClick={() => setIsAuthOpen(true)}>
@@ -429,7 +480,7 @@ const App = () => {
                  {/* 3. Right Promo Column (20%) */}
                  <div className="hidden lg:col-span-2 lg:flex flex-col gap-4 h-full">
                     <div className="flex-1 bg-cyan-50 dark:bg-cyan-900/10 rounded-lg p-4 flex flex-col justify-center items-center text-center border border-cyan-100 dark:border-cyan-500/20">
-                       <div className="w-12 h-12 bg-cyan-100 dark:bg-cyan-800 rounded-full flex items-center justify-center mb-2 overflow-hidden">
+                       <div className="w-12 h-12 bg-cyan-100 dark:bg-cyan-800 rounded-full flex items-center justify-center mb-2 overflow-hidden cursor-pointer" onClick={() => currentUser && setView(ViewState.PROFILE)}>
                           {currentUser ? (
                              currentUser.avatar ? <img src={currentUser.avatar} className="w-full h-full object-cover" /> : <span className="font-bold text-cyan-600 dark:text-cyan-300 text-xl">{currentUser.name.charAt(0)}</span>
                           ) : (
@@ -441,7 +492,7 @@ const App = () => {
                        </p>
                        <div className="flex gap-2 mt-3 w-full">
                           {currentUser ? (
-                             <button className="flex-1 bg-cyan-600 text-white text-xs font-bold py-1.5 rounded-md hover:bg-cyan-700 w-full">My Account</button>
+                             <button onClick={() => setView(ViewState.PROFILE)} className="flex-1 bg-cyan-600 text-white text-xs font-bold py-1.5 rounded-md hover:bg-cyan-700 w-full">My Account</button>
                           ) : (
                              <>
                                 <button onClick={() => setIsAuthOpen(true)} className="flex-1 bg-cyan-600 text-white text-xs font-bold py-1.5 rounded-md hover:bg-cyan-700">Join</button>
@@ -527,6 +578,60 @@ const App = () => {
                              <Sparkles className="w-5 h-5 text-gray-500 dark:text-gray-400 group-hover:text-cyan-500" />
                           </div>
                           <span className="text-[11px] font-medium text-center text-gray-600 dark:text-gray-300 leading-tight">{cat.name}</span>
+                       </div>
+                    ))}
+                 </div>
+              </div>
+
+              {/* SECTION: Splash Offer (New) */}
+              <SplashOffer onClick={() => setView(ViewState.PRODUCTS)} />
+
+              {/* SECTION: Today's Top Sales */}
+              <div className="mb-12 animate-fade-in-up">
+                 <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-center gap-2">
+                       <div className="p-2 bg-red-100 dark:bg-red-900/20 rounded-full text-red-600">
+                          <Flame className="w-5 h-5 fill-current animate-pulse" />
+                       </div>
+                       <h2 className="text-xl font-bold text-gray-800 dark:text-white">Today's Top Sales</h2>
+                    </div>
+                    <button onClick={() => { setActiveCategory('Top Sales'); setView(ViewState.PRODUCTS); }} className="text-sm font-bold text-cyan-600 hover:underline flex items-center gap-1">
+                       View All <ArrowRight className="w-4 h-4" />
+                    </button>
+                 </div>
+                 
+                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    {MOCK_PRODUCTS.slice(0, 4).map((p, idx) => (
+                       <div 
+                         key={p.id}
+                         onClick={() => handleProductClick(p)}
+                         className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-white/5 p-4 flex gap-4 cursor-pointer hover:shadow-lg transition-all group relative overflow-hidden"
+                       >
+                          {/* Rank Badge */}
+                          <div className="absolute top-0 left-0 bg-gray-900 text-white text-[10px] font-bold px-2 py-1 rounded-br-lg z-10">
+                             #{idx + 1}
+                          </div>
+
+                          <div className="w-24 h-24 flex-shrink-0 bg-gray-100 dark:bg-black/20 rounded-lg overflow-hidden">
+                             <img src={p.images[0]} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                          </div>
+                          
+                          <div className="flex flex-col justify-center flex-1 min-w-0">
+                             <h3 className="font-bold text-sm text-gray-900 dark:text-white line-clamp-2 mb-1 group-hover:text-cyan-600 transition-colors">{p.name}</h3>
+                             <div className="flex items-center gap-2 mb-2">
+                                <span className="text-orange-500 font-bold">৳{p.price.toLocaleString()}</span>
+                                <span className="text-xs text-gray-400 line-through">৳{Math.round(p.price * 1.2).toLocaleString()}</span>
+                             </div>
+                             
+                             {/* Progress Bar */}
+                             <div className="w-full bg-gray-100 dark:bg-white/10 h-1.5 rounded-full overflow-hidden">
+                                <div className="bg-gradient-to-r from-orange-500 to-red-500 h-full rounded-full" style={{ width: `${90 - (idx * 15)}%` }}></div>
+                             </div>
+                             <p className="text-[10px] text-gray-500 mt-1 flex justify-between">
+                                <span>Sold: {200 - (idx * 20)}</span>
+                                <span className="text-red-500 font-bold">Fast Selling</span>
+                             </p>
+                          </div>
                        </div>
                     ))}
                  </div>
@@ -641,64 +746,30 @@ const App = () => {
           )}
 
           {view === ViewState.PRODUCT_DETAIL && selectedProduct && (
-            <div className="py-4">
-               <button onClick={() => setView(ViewState.HOME)} className="mb-4 text-sm text-gray-500 hover:text-cyan-600 flex items-center gap-1"><ChevronLeft className="w-4 h-4" /> Back to Home</button>
-               <div className="bg-white dark:bg-gray-900 rounded-xl p-4 md:p-8 shadow-sm grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
-                  <div className="space-y-4">
-                     <Product3DViewer image={selectedProduct.images[0]} />
-                     <div className="flex gap-2 overflow-x-auto scrollbar-hide">
-                        {selectedProduct.images.map((img, i) => (
-                           <img key={i} src={img} className="w-20 h-20 rounded-lg border border-gray-200 cursor-pointer hover:border-cyan-500" />
-                        ))}
-                     </div>
-                  </div>
-                  <div>
-                     <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-2">{selectedProduct.name}</h1>
-                     <div className="flex items-center gap-4 mb-4">
-                        <div className="flex text-yellow-500 text-sm">{'★'.repeat(5)}</div>
-                        <span className="text-sm text-cyan-600">{selectedProduct.reviews} Ratings</span>
-                        <span className="text-gray-300">|</span>
-                        <span className="text-sm text-green-600">In Stock</span>
-                     </div>
-                     <div className="text-3xl font-bold text-orange-500 mb-6">৳ {selectedProduct.price.toLocaleString()}</div>
-                     
-                     <div className="space-y-4 mb-8">
-                        <div className="flex gap-4 items-center text-sm">
-                           <span className="text-gray-500 w-24">Color</span>
-                           <div className="flex gap-2">
-                              <button className="w-8 h-8 rounded-full bg-black border-2 border-gray-200 focus:border-cyan-500"></button>
-                              <button className="w-8 h-8 rounded-full bg-blue-600 border-2 border-gray-200 focus:border-cyan-500"></button>
-                           </div>
-                        </div>
-                        <div className="flex gap-4 items-center text-sm">
-                           <span className="text-gray-500 w-24">Quantity</span>
-                           <div className="flex items-center border border-gray-300 rounded-md">
-                              <button className="px-3 py-1 hover:bg-gray-100">-</button>
-                              <span className="px-3 py-1 font-bold">1</span>
-                              <button className="px-3 py-1 hover:bg-gray-100">+</button>
-                           </div>
-                        </div>
-                     </div>
-
-                     <div className="flex gap-4">
-                        <button className="flex-1 bg-cyan-100 text-cyan-700 font-bold py-3 rounded-lg hover:bg-cyan-200 transition-colors">Buy Now</button>
-                        <button onClick={() => addToCart(selectedProduct)} className="flex-1 bg-orange-500 text-white font-bold py-3 rounded-lg hover:bg-orange-600 transition-colors shadow-lg shadow-orange-500/20">Add to Cart</button>
-                        <button 
-                           onClick={() => toggleCompare(selectedProduct)}
-                           className={`p-3 rounded-lg border transition-colors ${compareList.some(c => c.id === selectedProduct.id) ? 'bg-cyan-600 text-white border-cyan-600' : 'border-gray-200 hover:border-cyan-500 text-gray-500'}`}
-                           title="Compare"
-                        >
-                           <Scale className="w-6 h-6" />
-                        </button>
-                     </div>
-                  </div>
-               </div>
-            </div>
+            <ProductDetail 
+              product={selectedProduct} 
+              onBack={() => setView(ViewState.HOME)} 
+              onAddToCart={addToCart}
+              onBuyNow={handleBuyNow}
+              onProductSelect={handleProductClick}
+              onToggleCompare={toggleCompare}
+              isCompared={compareList.some(c => c.id === selectedProduct.id)}
+            />
           )}
 
           {view === ViewState.CART_CHECKOUT && (
              <div className="py-4">
                 <OneSlideCheckout cart={cart} onBack={() => setView(ViewState.HOME)} onComplete={() => { setCart([]); setView(ViewState.HOME); alert("Ordered!"); }} />
+             </div>
+          )}
+
+          {view === ViewState.PROFILE && currentUser && (
+             <div className="py-4">
+               <UserProfileView 
+                 user={currentUser} 
+                 onLogout={handleLogout} 
+                 onUpdateUser={(updated) => setCurrentUser(updated)} 
+               />
              </div>
           )}
 

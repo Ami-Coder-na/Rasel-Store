@@ -1,5 +1,6 @@
+
 import React, { useState } from 'react';
-import { X, Mail, Lock, User, ArrowRight, Facebook, Chrome, Sparkles } from 'lucide-react';
+import { X, Mail, Lock, User, ArrowRight, Facebook, Chrome, Sparkles, LogIn } from 'lucide-react';
 import { UserProfile } from '../types';
 
 interface AuthModalProps {
@@ -18,9 +19,26 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose, onLogin }) => {
   const DEMO_EMAIL = 'demo@raselstore.bd';
   const DEMO_PASS = 'password123';
 
-  const fillDemo = () => {
+  const loginDemo = () => {
+    setIsLoading(true);
     setEmail(DEMO_EMAIL);
     setPassword(DEMO_PASS);
+    
+    // Simulate Instant Login
+    setTimeout(() => {
+      setIsLoading(false);
+      const mockUser: UserProfile = {
+        id: 'u_demo_123',
+        name: 'Rasel Demo User',
+        email: DEMO_EMAIL,
+        avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=200',
+        phone: '+880 1711 000000',
+        joinDate: 'Jan 2023',
+        address: 'House 12, Road 5, Bashundhara R/A, Dhaka'
+      };
+      onLogin(mockUser);
+      onClose();
+    }, 800);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -30,12 +48,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose, onLogin }) => {
     // Simulate API delay
     setTimeout(() => {
       setIsLoading(false);
-      // Mock successful login/register
       const mockUser: UserProfile = {
-        id: 'u1',
-        name: isLogin ? 'Rasel Demo User' : name || 'New User',
+        id: 'u_' + Date.now(),
+        name: isLogin ? 'Rasel User' : name || 'New User',
         email: email,
-        avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=100'
+        avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=200',
+        joinDate: new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
+        address: 'Dhaka, Bangladesh'
       };
       onLogin(mockUser);
       onClose();
@@ -61,7 +80,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose, onLogin }) => {
           <X className="w-5 h-5" />
         </button>
 
-        {/* Left Side: Visuals (Hidden on Mobile) */}
+        {/* Left Side: Visuals & Demo (Hidden on Mobile) */}
         <div className="hidden md:flex w-5/12 bg-gradient-to-br from-cyan-600 to-blue-800 relative overflow-hidden flex-col justify-between p-8 text-white">
            {/* Abstract Shapes */}
            <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl"></div>
@@ -80,19 +99,23 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose, onLogin }) => {
               </p>
            </div>
 
-           <div className="relative z-10 space-y-4">
-              <div className="flex items-center gap-3 bg-white/10 backdrop-blur-sm p-3 rounded-lg border border-white/10">
-                 <Sparkles className="w-5 h-5 text-yellow-300" />
-                 <div className="text-xs">
-                    <p className="font-bold">Exclusive Rewards</p>
-                    <p className="opacity-75">Earn points on every purchase</p>
-                 </div>
+           {/* Quick Demo Login Box */}
+           <div className="relative z-10 bg-white/10 backdrop-blur-md p-4 rounded-xl border border-white/20 shadow-lg">
+              <div className="flex items-center gap-2 mb-2 text-cyan-300 font-bold text-xs uppercase tracking-wider">
+                 <Sparkles className="w-4 h-4" /> Quick Access
               </div>
+              <p className="text-xs text-cyan-50 mb-3">Want to explore without registering? Use our demo account.</p>
+              <button 
+                onClick={loginDemo}
+                className="w-full bg-white text-blue-900 font-bold text-sm py-2 rounded-lg hover:bg-cyan-50 transition-colors flex items-center justify-center gap-2"
+              >
+                 <LogIn className="w-4 h-4" /> Instant Demo Login
+              </button>
            </div>
         </div>
 
         {/* Right Side: Form */}
-        <div className="flex-1 p-8 md:p-12 relative">
+        <div className="flex-1 p-8 md:p-12 relative flex flex-col justify-center">
           <button 
             onClick={onClose} 
             className="absolute top-6 right-6 z-30 hidden md:block text-gray-400 hover:text-cyan-600 transition-colors"
@@ -100,7 +123,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose, onLogin }) => {
             <X className="w-6 h-6" />
           </button>
 
-          <div className="max-w-md mx-auto">
+          <div className="max-w-md mx-auto w-full">
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
               {isLogin ? 'Welcome Back!' : 'Create Account'}
             </h2>
@@ -177,22 +200,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose, onLogin }) => {
                 </div>
               </div>
 
-              {/* Demo Credentials Tip */}
-              {isLogin && (
-                <div className="bg-cyan-50/50 dark:bg-cyan-900/10 border border-cyan-100 dark:border-cyan-500/20 rounded-lg p-3 flex items-center justify-between text-xs animate-fade-in">
-                   <div className="text-cyan-800 dark:text-cyan-200">
-                      <span className="font-bold">Demo:</span> {DEMO_EMAIL}
-                   </div>
-                   <button 
-                     type="button" 
-                     onClick={fillDemo}
-                     className="text-[10px] font-bold bg-white dark:bg-cyan-800 border border-cyan-200 dark:border-cyan-600 text-cyan-700 dark:text-cyan-100 px-2 py-1 rounded hover:shadow-sm transition-all"
-                   >
-                     Auto Fill
-                   </button>
-                </div>
-              )}
-
               <button 
                 type="submit" 
                 disabled={isLoading}
@@ -205,6 +212,15 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose, onLogin }) => {
                     {isLogin ? 'Sign In' : 'Create Account'} <ArrowRight className="w-4 h-4" />
                   </>
                 )}
+              </button>
+
+              {/* Mobile Demo Login Button */}
+              <button 
+                 type="button"
+                 onClick={loginDemo}
+                 className="w-full md:hidden bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-300 font-bold py-3 rounded-xl border border-gray-200 dark:border-white/10 hover:bg-gray-200 transition-colors text-sm flex items-center justify-center gap-2"
+              >
+                 <Sparkles className="w-4 h-4 text-cyan-600" /> Instant Demo Login
               </button>
 
               {/* Social Login */}

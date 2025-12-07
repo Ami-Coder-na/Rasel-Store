@@ -1,4 +1,5 @@
-import { Product } from './types';
+
+import { Product, Order, ActivityLog } from './types';
 
 export const APP_NAME = "RASEL STORE";
 
@@ -62,7 +63,9 @@ export const MOCK_PRODUCTS: Product[] = [
     reviews: 124,
     arEnabled: true,
     stock: 15,
-    carbonFootprint: "Neutral"
+    carbonFootprint: "Neutral",
+    colors: ['#1a1a1a', '#2d3748', '#718096'],
+    sizes: ['S', 'M', 'L', 'XL']
   },
   {
     id: 'p2',
@@ -84,7 +87,8 @@ export const MOCK_PRODUCTS: Product[] = [
     reviews: 850,
     arEnabled: true,
     stock: 5,
-    carbonFootprint: "Low"
+    carbonFootprint: "Low",
+    colors: ['#000000', '#C0C0C0']
   },
   {
     id: 'p3',
@@ -106,7 +110,8 @@ export const MOCK_PRODUCTS: Product[] = [
     reviews: 42,
     arEnabled: true,
     stock: 32,
-    carbonFootprint: "Medium"
+    carbonFootprint: "Medium",
+    sizes: ['40', '41', '42', '43', '44', '45']
   },
   {
     id: 'p4',
@@ -128,7 +133,8 @@ export const MOCK_PRODUCTS: Product[] = [
     reviews: 210,
     arEnabled: false,
     stock: 8,
-    carbonFootprint: "High"
+    carbonFootprint: "High",
+    colors: ['#ffffff', '#000000', '#ff0000']
   },
   {
     id: 'p5',
@@ -150,7 +156,8 @@ export const MOCK_PRODUCTS: Product[] = [
     reviews: 89,
     arEnabled: true,
     stock: 12,
-    carbonFootprint: "Medium"
+    carbonFootprint: "Medium",
+    colors: ['#2b6cb0', '#2d3748']
   },
   {
     id: 'p6',
@@ -172,9 +179,9 @@ export const MOCK_PRODUCTS: Product[] = [
     reviews: 340,
     arEnabled: false,
     stock: 50,
-    carbonFootprint: "Low"
+    carbonFootprint: "Low",
+    colors: ['#000000', '#4a5568']
   },
-  // New Products for denser UI
   {
     id: 'p7',
     name: 'Quantum Earbuds Pro',
@@ -184,7 +191,8 @@ export const MOCK_PRODUCTS: Product[] = [
     description: 'Zero-latency neural interface earbuds with active noise cancellation.',
     images: ['https://picsum.photos/id/1084/600/800'],
     specs: { Battery: '30h', ANC: 'Active' },
-    rating: 4.4, reviews: 55, arEnabled: false, stock: 100, carbonFootprint: 'Low'
+    rating: 4.4, reviews: 55, arEnabled: false, stock: 100, carbonFootprint: 'Low',
+    colors: ['#ffffff', '#000000']
   },
   {
     id: 'p8',
@@ -193,9 +201,10 @@ export const MOCK_PRODUCTS: Product[] = [
     currency: 'BDT',
     category: 'Apparel',
     description: 'Woven with flexible solar threads to charge devices on the go.',
-    images: ['https://picsum.photos/id/338/600/800'], // Reusing generic image for demo
+    images: ['https://picsum.photos/id/338/600/800'], 
     specs: { Output: '5V/2A', Fabric: 'Cotton-Tech' },
-    rating: 4.2, reviews: 18, arEnabled: false, stock: 20, carbonFootprint: 'Low'
+    rating: 4.2, reviews: 18, arEnabled: false, stock: 20, carbonFootprint: 'Low',
+    sizes: ['M', 'L', 'XL']
   },
   {
     id: 'p9',
@@ -206,7 +215,8 @@ export const MOCK_PRODUCTS: Product[] = [
     description: 'Full body haptic feedback suit for VR immersion.',
     images: ['https://picsum.photos/id/1060/600/800'],
     specs: { Points: '128', Connectivity: 'WiFi 6E' },
-    rating: 4.9, reviews: 12, arEnabled: false, stock: 3, carbonFootprint: 'High'
+    rating: 4.9, reviews: 12, arEnabled: false, stock: 3, carbonFootprint: 'High',
+    sizes: ['Universal']
   },
   {
     id: 'p10',
@@ -215,7 +225,7 @@ export const MOCK_PRODUCTS: Product[] = [
     currency: 'BDT',
     category: 'Energy',
     description: 'Safe, pocket-sized cold fusion generator for unlimited power.',
-    images: ['https://picsum.photos/id/237/600/800'], // Dog for fun/placeholder
+    images: ['https://picsum.photos/id/237/600/800'],
     specs: { Output: '10kW', Safety: 'A++' },
     rating: 5.0, reviews: 1, arEnabled: true, stock: 1, carbonFootprint: 'Low'
   },
@@ -281,4 +291,48 @@ export const SUGGESTED_QUERIES = [
   "Compare the AR Glasses and Drone",
   "Show me sustainable tech",
   "Gift ideas under 5000 BDT"
+];
+
+// MOCK DATA FOR USER PROFILE
+export const MOCK_ORDERS: Order[] = [
+  {
+    id: 'ORD-72910',
+    date: '2023-11-20',
+    total: 54000,
+    status: 'Processing',
+    items: [
+      { ...MOCK_PRODUCTS[1], quantity: 1 }, 
+      { ...MOCK_PRODUCTS[6], quantity: 1 }
+    ],
+    paymentMethod: 'bKash',
+    trackingNumber: 'TRK-9921002'
+  },
+  {
+    id: 'ORD-66120',
+    date: '2023-10-15',
+    total: 12500,
+    status: 'Delivered',
+    items: [
+      { ...MOCK_PRODUCTS[0], quantity: 1 }
+    ],
+    paymentMethod: 'VISA',
+    trackingNumber: 'TRK-1123445'
+  },
+  {
+    id: 'ORD-55102',
+    date: '2023-09-02',
+    total: 8500,
+    status: 'Cancelled',
+    items: [
+      { ...MOCK_PRODUCTS[2], quantity: 1 }
+    ],
+    paymentMethod: 'COD'
+  }
+];
+
+export const MOCK_ACTIVITY: ActivityLog[] = [
+  { id: '1', action: 'Login Successful', description: 'Logged in from Chrome on Windows', timestamp: '2 mins ago', icon: 'login' },
+  { id: '2', action: 'Order Placed', description: 'Order #ORD-72910 placed via bKash', timestamp: '5 days ago', icon: 'order' },
+  { id: '3', action: 'Profile Updated', description: 'Changed shipping address', timestamp: '2 weeks ago', icon: 'edit' },
+  { id: '4', action: 'Password Changed', description: 'Security update', timestamp: '1 month ago', icon: 'security' },
 ];
