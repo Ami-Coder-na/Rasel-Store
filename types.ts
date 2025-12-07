@@ -1,3 +1,4 @@
+
 export interface Product {
   id: string;
   name: string;
@@ -34,7 +35,8 @@ export enum ViewState {
   CART_CHECKOUT = 'CART_CHECKOUT',
   AR_VIEW = 'AR_VIEW',
   ABOUT = 'ABOUT',
-  CONTACT = 'CONTACT'
+  CONTACT = 'CONTACT',
+  COMPARE = 'COMPARE'
 }
 
 export interface ChatMessage {

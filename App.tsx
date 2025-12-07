@@ -1,11 +1,12 @@
-
 import React, { useState, useEffect, useRef } from 'react';
-import { ShoppingBag, Search, Menu, Sun, Moon, Zap, User, ArrowRight, Truck, ShieldCheck, Cpu, Mail, MapPin, Phone, Globe, Instagram, Facebook, Twitter, X, Clock, Coffee, Sparkles, Play, Star, Plus, Flame, TrendingUp, Gift, Headphones, Lock, ChevronRight, ChevronLeft, Smartphone, Watch, Camera, Gamepad, Shirt, Home, Monitor, Wifi, Code, Activity, Wind, Anchor } from 'lucide-react';
+import { ShoppingBag, Search, Menu, Sun, Moon, Zap, User, ArrowRight, Truck, ShieldCheck, Cpu, Mail, MapPin, Phone, Globe, Instagram, Facebook, Twitter, X, Clock, Coffee, Sparkles, Play, Star, Plus, Flame, TrendingUp, Gift, Headphones, Lock, ChevronRight, ChevronLeft, Smartphone, Watch, Camera, Gamepad, Shirt, Home, Monitor, Wifi, Code, Activity, Wind, Anchor, Scale, Eye } from 'lucide-react';
 import { MOCK_PRODUCTS, SUGGESTED_QUERIES, APP_NAME, CATEGORIES, SERVICE_FEATURES, BRANDS, ALL_CATEGORIES } from './constants';
 import { Product, CartItem, UserContext, ViewState } from './types';
 import { Copilot } from './components/Copilot';
 import { OneSlideCheckout } from './components/OneSlideCheckout';
 import { Product3DViewer } from './components/Product3DViewer';
+import { CompareView } from './components/CompareView';
+import { QuickViewModal } from './components/QuickViewModal';
 
 // --- Layout Constants ---
 const CONTAINER_CLASS = "max-w-[1400px] mx-auto px-4 lg:px-6";
@@ -59,12 +60,47 @@ const Marquee = () => (
   </div>
 );
 
-const FlashSaleCard: React.FC<{ product: Product, onClick: () => void, onAdd: (e: any) => void }> = ({ product, onClick, onAdd }) => (
-  <div onClick={onClick} className="min-w-[160px] md:min-w-[190px] bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg hover:shadow-lg transition-all cursor-pointer group flex flex-col h-full">
+const FlashSaleCard: React.FC<{ 
+  product: Product, 
+  onClick: () => void, 
+  onAdd: (e: any) => void,
+  onCompare: (e: any) => void,
+  onQuickView: (e: any) => void,
+  isCompared: boolean 
+}> = ({ product, onClick, onAdd, onCompare, onQuickView, isCompared }) => (
+  <div onClick={onClick} className="min-w-[160px] md:min-w-[190px] bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg hover:shadow-lg transition-all cursor-pointer group flex flex-col h-full relative overflow-hidden">
     <div className="relative aspect-square p-2">
       <img src={product.images[0]} className="w-full h-full object-cover rounded-md group-hover:scale-105 transition-transform duration-500" />
-      <div className="absolute top-2 left-2 bg-orange-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-sm">
+      <div className="absolute top-2 left-2 bg-orange-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-sm z-10">
         -25%
+      </div>
+      
+      {/* Action Buttons Container */}
+      <div className="absolute bottom-4 right-4 flex flex-col gap-2 z-20 md:translate-y-12 group-hover:translate-y-0 transition-transform duration-300">
+        {/* Quick View Button */}
+        <button 
+          onClick={(e) => { e.stopPropagation(); onQuickView(e); }}
+          className="bg-white text-gray-700 hover:bg-cyan-50 hover:text-cyan-600 p-2 rounded-full shadow-lg transition-colors"
+          title="Quick View"
+        >
+          <Eye className="w-4 h-4" />
+        </button>
+        {/* Compare Button */}
+        <button 
+          onClick={(e) => { e.stopPropagation(); onCompare(e); }}
+          className={`p-2 rounded-full shadow-lg transition-colors ${isCompared ? 'bg-cyan-600 text-white' : 'bg-white text-gray-700 hover:bg-cyan-50'}`}
+          title="Compare"
+        >
+          <Scale className="w-4 h-4" />
+        </button>
+        {/* Add to Cart Button */}
+        <button 
+          onClick={(e) => { e.stopPropagation(); onAdd(e); }}
+          className="bg-orange-500 text-white p-2 rounded-full shadow-lg hover:bg-orange-600 transition-colors"
+          title="Add to Cart"
+        >
+          <ShoppingBag className="w-4 h-4" />
+        </button>
       </div>
     </div>
     <div className="p-3 flex flex-col flex-1">
@@ -83,23 +119,51 @@ const FlashSaleCard: React.FC<{ product: Product, onClick: () => void, onAdd: (e
   </div>
 );
 
-const ProductCardMinimal: React.FC<{ product: Product, onClick: () => void, onAdd?: (e: any) => void }> = ({ product, onClick, onAdd }) => (
+const ProductCardMinimal: React.FC<{ 
+  product: Product, 
+  onClick: () => void, 
+  onAdd?: (e: any) => void,
+  onCompare?: (e: any) => void,
+  onQuickView?: (e: any) => void,
+  isCompared?: boolean 
+}> = ({ product, onClick, onAdd, onCompare, onQuickView, isCompared }) => (
   <div onClick={onClick} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-white/10 rounded-lg hover:shadow-[0_4px_20px_rgba(0,0,0,0.1)] transition-all cursor-pointer group flex flex-col overflow-hidden relative">
-    <div className="relative aspect-square bg-gray-50 dark:bg-black/20">
-      <img src={product.images[0]} className="w-full h-full object-cover group-hover:opacity-90 transition-opacity" />
+    <div className="relative aspect-square bg-gray-50 dark:bg-black/20 overflow-hidden">
+      <img src={product.images[0]} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
       {product.arEnabled && (
-         <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-md p-1.5 rounded-full">
+         <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-md p-1.5 rounded-full z-10">
             <Zap className="w-3 h-3 text-cyan-400" />
          </div>
       )}
-      {/* Add to Cart Button (Hover / Mobile Persistent) */}
-      <button 
-        onClick={(e) => { e.stopPropagation(); onAdd?.(e); }}
-        className="absolute bottom-2 right-2 bg-orange-500 text-white p-2 rounded-full shadow-lg opacity-100 md:opacity-0 group-hover:opacity-100 transform translate-y-0 md:translate-y-2 group-hover:translate-y-0 transition-all duration-300 hover:bg-orange-600 z-10"
-        title="Add to Cart"
-      >
-        <ShoppingBag className="w-4 h-4" />
-      </button>
+      
+      {/* Floating Actions */}
+      <div className="absolute bottom-3 right-3 flex flex-col gap-2 z-20 md:translate-y-36 group-hover:translate-y-0 transition-transform duration-300">
+         {/* Quick View */}
+         <button 
+           onClick={(e) => { e.stopPropagation(); onQuickView?.(e); }}
+           className="bg-white text-gray-700 hover:bg-cyan-50 hover:text-cyan-600 p-2.5 rounded-full shadow-lg flex items-center justify-center transition-colors"
+           title="Quick View"
+         >
+           <Eye className="w-4 h-4" />
+         </button>
+         {/* Compare */}
+         <button 
+           onClick={(e) => { e.stopPropagation(); onCompare?.(e); }}
+           className={`p-2.5 rounded-full shadow-lg flex items-center justify-center transition-colors ${isCompared ? 'bg-cyan-600 text-white' : 'bg-white text-gray-700 hover:bg-cyan-50'}`}
+           title="Compare"
+         >
+           <Scale className="w-4 h-4" />
+         </button>
+         {/* Add to Cart */}
+         <button 
+           onClick={(e) => { e.stopPropagation(); onAdd?.(e); }}
+           className="bg-orange-500 text-white p-2.5 rounded-full shadow-lg hover:bg-orange-600 flex items-center justify-center transition-colors"
+           title="Add to Cart"
+         >
+           <ShoppingBag className="w-4 h-4" />
+         </button>
+      </div>
+
     </div>
     <div className="p-3">
       <h3 className="text-sm text-gray-700 dark:text-gray-200 line-clamp-2 h-10 group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors">{product.name}</h3>
@@ -125,7 +189,9 @@ const HERO_SLIDES = [
 const App = () => {
   const [view, setView] = useState<ViewState>(ViewState.HOME);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
   const [cart, setCart] = useState<CartItem[]>([]);
+  const [compareList, setCompareList] = useState<Product[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [themeMode, setThemeMode] = useState<'dark' | 'light'>('light');
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -148,6 +214,20 @@ const App = () => {
     });
   };
 
+  const toggleCompare = (product: Product) => {
+    setCompareList(prev => {
+      const exists = prev.find(p => p.id === product.id);
+      if (exists) {
+        return prev.filter(p => p.id !== product.id);
+      }
+      if (prev.length >= 4) {
+        alert("You can compare up to 4 items at a time.");
+        return prev;
+      }
+      return [...prev, product];
+    });
+  };
+
   const toggleTheme = () => setThemeMode(prev => prev === 'dark' ? 'light' : 'dark');
 
   const handleProductClick = (product: Product) => {
@@ -157,7 +237,7 @@ const App = () => {
 
   return (
     <div className={themeMode}>
-      <div className="min-h-screen bg-gray-50 dark:bg-black font-sans text-gray-900 dark:text-white transition-colors duration-300">
+      <div className="min-h-screen bg-gray-50 dark:bg-black font-sans text-gray-900 dark:text-white transition-colors duration-300 relative pb-20">
         
         {/* Top Utility Bar */}
         <TopBar />
@@ -315,7 +395,10 @@ const App = () => {
                             key={p.id} 
                             product={p} 
                             onClick={() => handleProductClick(p)} 
-                            onAdd={() => addToCart(p)} 
+                            onAdd={() => addToCart(p)}
+                            onCompare={() => toggleCompare(p)}
+                            onQuickView={() => setQuickViewProduct(p)}
+                            isCompared={compareList.some(c => c.id === p.id)}
                           />
                        ))}
                     </div>
@@ -342,10 +425,26 @@ const App = () => {
                  <h2 className="text-xl font-bold text-gray-800 dark:text-white mb-6 border-l-4 border-cyan-600 pl-3">Just For You</h2>
                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 md:gap-4">
                     {MOCK_PRODUCTS.map((p) => (
-                       <ProductCardMinimal key={p.id} product={p} onClick={() => handleProductClick(p)} onAdd={() => addToCart(p)} />
+                       <ProductCardMinimal 
+                         key={p.id} 
+                         product={p} 
+                         onClick={() => handleProductClick(p)} 
+                         onAdd={() => addToCart(p)} 
+                         onCompare={() => toggleCompare(p)}
+                         onQuickView={() => setQuickViewProduct(p)}
+                         isCompared={compareList.some(c => c.id === p.id)}
+                       />
                     ))}
                     {MOCK_PRODUCTS.slice(0, 5).map((p) => (
-                       <ProductCardMinimal key={p.id + 'dup'} product={{...p, id: p.id + 'dup'}} onClick={() => handleProductClick(p)} onAdd={() => addToCart(p)} />
+                       <ProductCardMinimal 
+                         key={p.id + 'dup'} 
+                         product={{...p, id: p.id + 'dup'}} 
+                         onClick={() => handleProductClick(p)} 
+                         onAdd={() => addToCart(p)}
+                         onCompare={() => toggleCompare(p)}
+                         onQuickView={() => setQuickViewProduct(p)}
+                         isCompared={compareList.some(c => c.id === p.id)} 
+                       />
                     ))}
                  </div>
                  
@@ -362,7 +461,15 @@ const App = () => {
                <h1 className="text-2xl font-bold mb-6 dark:text-white">All Products</h1>
                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
                   {MOCK_PRODUCTS.map(p => (
-                     <ProductCardMinimal key={p.id} product={p} onClick={() => handleProductClick(p)} onAdd={() => addToCart(p)} />
+                     <ProductCardMinimal 
+                       key={p.id} 
+                       product={p} 
+                       onClick={() => handleProductClick(p)} 
+                       onAdd={() => addToCart(p)}
+                       onCompare={() => toggleCompare(p)}
+                       onQuickView={() => setQuickViewProduct(p)}
+                       isCompared={compareList.some(c => c.id === p.id)} 
+                     />
                   ))}
                </div>
             </div>
@@ -411,6 +518,13 @@ const App = () => {
                      <div className="flex gap-4">
                         <button className="flex-1 bg-cyan-100 text-cyan-700 font-bold py-3 rounded-lg hover:bg-cyan-200 transition-colors">Buy Now</button>
                         <button onClick={() => addToCart(selectedProduct)} className="flex-1 bg-orange-500 text-white font-bold py-3 rounded-lg hover:bg-orange-600 transition-colors shadow-lg shadow-orange-500/20">Add to Cart</button>
+                        <button 
+                           onClick={() => toggleCompare(selectedProduct)}
+                           className={`p-3 rounded-lg border transition-colors ${compareList.some(c => c.id === selectedProduct.id) ? 'bg-cyan-600 text-white border-cyan-600' : 'border-gray-200 hover:border-cyan-500 text-gray-500'}`}
+                           title="Compare"
+                        >
+                           <Scale className="w-6 h-6" />
+                        </button>
                      </div>
                   </div>
                </div>
@@ -441,7 +555,44 @@ const App = () => {
              </div>
           )}
 
+          {view === ViewState.COMPARE && (
+             <CompareView 
+                products={compareList} 
+                onRemove={(id) => setCompareList(prev => prev.filter(p => p.id !== id))}
+                onClear={() => setCompareList([])}
+                onAddToCart={(p) => addToCart(p)}
+                onBack={() => setView(ViewState.HOME)}
+             />
+          )}
+
         </main>
+
+        {/* Modal Overlays */}
+        {quickViewProduct && (
+          <QuickViewModal 
+             product={quickViewProduct} 
+             onClose={() => setQuickViewProduct(null)} 
+             onAddToCart={addToCart} 
+          />
+        )}
+
+        {/* Floating Compare Bar */}
+        {compareList.length > 0 && view !== ViewState.COMPARE && (
+           <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 bg-white dark:bg-gray-800 shadow-2xl rounded-full px-6 py-3 border border-gray-200 dark:border-white/10 flex items-center gap-4 animate-fade-in-up">
+              <div className="flex items-center gap-2">
+                 <Scale className="w-5 h-5 text-cyan-600" />
+                 <span className="font-bold text-gray-800 dark:text-white">{compareList.length} <span className="text-xs font-normal text-gray-500">/ 4</span></span>
+              </div>
+              <div className="h-4 w-px bg-gray-300 dark:bg-gray-600"></div>
+              <button onClick={() => setCompareList([])} className="text-xs font-bold text-gray-500 hover:text-red-500 transition-colors">Clear</button>
+              <button 
+                 onClick={() => setView(ViewState.COMPARE)}
+                 className="bg-cyan-600 text-white text-xs font-bold px-4 py-1.5 rounded-full hover:bg-cyan-700 transition-colors"
+              >
+                 COMPARE
+              </button>
+           </div>
+        )}
 
         <footer className="bg-gray-800 text-white pt-12 pb-6 mt-12">
            <div className={`${CONTAINER_CLASS} grid grid-cols-1 md:grid-cols-4 gap-8 mb-8`}>
