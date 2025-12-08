@@ -5,6 +5,7 @@ export interface Product {
   price: number;
   currency: string;
   category: string;
+  brand: string; // Added brand
   description: string;
   images: string[];
   specs: Record<string, string>;
@@ -69,7 +70,8 @@ export enum ViewState {
   ABOUT = 'ABOUT',
   CONTACT = 'CONTACT',
   COMPARE = 'COMPARE',
-  PROFILE = 'PROFILE'
+  PROFILE = 'PROFILE',
+  TRACK_ORDER = 'TRACK_ORDER'
 }
 
 export interface ChatMessage {

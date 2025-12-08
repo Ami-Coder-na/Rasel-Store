@@ -4,7 +4,7 @@ import {
   ArrowLeft, Star, ShoppingBag, Heart, Share2, 
   Check, Truck, ShieldCheck, RefreshCw, 
   ChevronRight, Box, Image as ImageIcon, Minus, Plus,
-  Zap, ArrowRight, AlertCircle
+  Zap, ArrowRight, AlertCircle, Coins
 } from 'lucide-react';
 import { Product, CartItem } from '../types';
 import { MOCK_PRODUCTS } from '../constants';
@@ -18,6 +18,8 @@ interface ProductDetailProps {
   onProductSelect: (product: Product) => void;
   onToggleCompare: (product: Product) => void;
   isCompared: boolean;
+  onToggleWishlist: (product: Product) => void;
+  isWishlisted: boolean;
 }
 
 export const ProductDetail: React.FC<ProductDetailProps> = ({ 
@@ -27,7 +29,9 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({
   onBuyNow,
   onProductSelect,
   onToggleCompare,
-  isCompared
+  isCompared,
+  onToggleWishlist,
+  isWishlisted
 }) => {
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [viewMode, setViewMode] = useState<'image' | '3d'>('image');
@@ -55,6 +59,9 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({
     selectedSize
   };
 
+  // Calculate Points (1 Point per 10 BDT)
+  const earnedPoints = Math.floor(product.price / 10);
+
   const handleAddToCart = () => {
     setIsAdding(true);
     setTimeout(() => {
@@ -78,7 +85,7 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({
   return (
     <div ref={topRef} className="animate-fade-in pb-12 bg-gray-50 dark:bg-black min-h-screen">
       {/* Breadcrumb & Navigation */}
-      <div className="sticky top-[72px] z-30 bg-white/80 dark:bg-black/80 backdrop-blur-md border-b border-gray-200 dark:border-white/10 mb-6">
+      <div className="sticky top-[72px] z-30 bg-white/80 dark:bg-black/80 backdrop-blur-md border-b border-gray-200 dark:border-white/10 mb-6 transition-all">
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
           <button 
             onClick={onBack} 
@@ -102,8 +109,11 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({
             <button onClick={() => onToggleCompare(product)} className={`p-2 rounded-full transition-colors ${isCompared ? 'text-cyan-600 bg-cyan-50 dark:bg-cyan-900/20' : 'text-gray-400 hover:text-cyan-600 hover:bg-gray-100 dark:hover:bg-white/5'}`}>
                <RefreshCw className="w-4 h-4" />
             </button>
-            <button className="p-2 rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
-               <Heart className="w-4 h-4" />
+            <button 
+              onClick={() => onToggleWishlist(product)}
+              className={`p-2 rounded-full transition-colors ${isWishlisted ? 'text-red-500 bg-red-50 dark:bg-red-900/20' : 'text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20'}`}
+            >
+               <Heart className={`w-4 h-4 ${isWishlisted ? 'fill-current' : ''}`} />
             </button>
             <button className="p-2 rounded-full text-gray-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors">
                <Share2 className="w-4 h-4" />
@@ -115,34 +125,32 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({
       <div className="max-w-7xl mx-auto px-4">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
           
-          {/* Left Column: Gallery (Sticky) */}
+          {/* Left Column: Gallery (Sticky on Desktop only) */}
           <div className="lg:col-span-7">
-            <div className="sticky top-28 space-y-4">
+            <div className="lg:sticky lg:top-32 space-y-4">
               <div className="relative bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-white/5 overflow-hidden aspect-square md:aspect-[4/3] group shadow-sm">
                 
-                {/* View Mode Toggles */}
+                {/* Modern Toggle Switch */}
                 {product.arEnabled && (
-                  <div className="absolute top-4 left-4 z-20 flex flex-col gap-2">
-                    <button 
-                      onClick={() => setViewMode('image')}
-                      className={`p-2.5 rounded-xl backdrop-blur-md border transition-all ${viewMode === 'image' ? 'bg-white dark:bg-gray-800 border-cyan-500 text-cyan-600' : 'bg-black/30 border-white/10 text-white hover:bg-black/50'}`}
-                      title="Image View"
-                    >
-                      <ImageIcon className="w-5 h-5" />
-                    </button>
-                    <button 
-                      onClick={() => setViewMode('3d')}
-                      className={`p-2.5 rounded-xl backdrop-blur-md border transition-all ${viewMode === '3d' ? 'bg-white dark:bg-gray-800 border-cyan-500 text-cyan-600' : 'bg-black/30 border-white/10 text-white hover:bg-black/50'}`}
-                      title="3D View"
-                    >
-                      <Box className="w-5 h-5" />
-                    </button>
+                  <div className="absolute top-4 left-4 z-20 bg-white/10 backdrop-blur-md border border-white/20 p-1 rounded-full flex gap-1">
+                     <button
+                        onClick={() => setViewMode('image')}
+                        className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold transition-all ${viewMode === 'image' ? 'bg-white text-black shadow-md' : 'text-white hover:bg-white/10'}`}
+                     >
+                        <ImageIcon className="w-3 h-3" /> Gallery
+                     </button>
+                     <button
+                        onClick={() => setViewMode('3d')}
+                        className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold transition-all ${viewMode === '3d' ? 'bg-cyan-500 text-white shadow-md shadow-cyan-500/40' : 'text-white hover:bg-white/10'}`}
+                     >
+                        <Box className="w-3 h-3" /> 3D View
+                     </button>
                   </div>
                 )}
 
                 {/* Main Content */}
                 {viewMode === 'image' ? (
-                  <div className="w-full h-full relative cursor-zoom-in overflow-hidden">
+                  <div className="w-full h-full relative cursor-zoom-in overflow-hidden bg-gray-100 dark:bg-black/20">
                      <img 
                         src={product.images[activeImageIndex]} 
                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-125 origin-center"
@@ -188,9 +196,11 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({
                  )}
               </div>
 
-              <h1 className="text-3xl font-heading font-black text-gray-900 dark:text-white mb-4 leading-tight">
-                {product.name}
-              </h1>
+              <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
+                <h1 className="text-3xl font-heading font-black text-gray-900 dark:text-white leading-tight flex-1">
+                  {product.name}
+                </h1>
+              </div>
 
               {/* Rating & Stock */}
               <div className="flex flex-wrap items-center gap-4 mb-6 text-sm">
@@ -213,12 +223,23 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({
                 )}
               </div>
 
-              {/* Price */}
-              <div className="mb-8 p-4 bg-gray-50 dark:bg-white/5 rounded-xl border border-gray-100 dark:border-white/5">
-                <div className="flex items-end gap-3">
+              {/* Price & Points */}
+              <div className="mb-8 p-4 bg-gray-50 dark:bg-white/5 rounded-xl border border-gray-100 dark:border-white/5 relative overflow-hidden">
+                <div className="flex items-end gap-3 mb-2">
                   <span className="text-4xl font-bold text-orange-500">৳{product.price.toLocaleString()}</span>
                   <span className="text-lg text-gray-400 line-through mb-1">৳{Math.round(product.price * 1.2).toLocaleString()}</span>
                 </div>
+                
+                {/* Gamification Badge */}
+                <div className="inline-flex items-center gap-1.5 bg-yellow-100 dark:bg-yellow-900/30 px-3 py-1 rounded-full border border-yellow-200 dark:border-yellow-700/50 mb-3">
+                   <div className="bg-yellow-400 rounded-full p-0.5">
+                      <Coins className="w-3 h-3 text-yellow-900" />
+                   </div>
+                   <span className="text-xs font-bold text-yellow-800 dark:text-yellow-400">
+                      Earn +{earnedPoints} Coins
+                   </span>
+                </div>
+
                 <div className="mt-2 text-xs text-gray-500 flex items-center gap-2">
                    <Truck className="w-3 h-3" /> Free Delivery on orders over 5k BDT
                 </div>

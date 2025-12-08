@@ -5,18 +5,18 @@ export const APP_NAME = "RASEL STORE";
 
 // Expanded Category List for Sidebar
 export const ALL_CATEGORIES = [
-  { id: 'c1', name: 'Cyber Fashion', icon: 'Shirt' },
-  { id: 'c2', name: 'Smart Phones', icon: 'Smartphone' },
-  { id: 'c3', name: 'Laptops & PC', icon: 'Monitor' },
-  { id: 'c4', name: 'Audio Gear', icon: 'Headphones' },
+  { id: 'c1', name: 'Apparel', icon: 'Shirt' },
+  { id: 'c2', name: 'Tech', icon: 'Smartphone' },
+  { id: 'c3', name: 'Laptops', icon: 'Monitor' },
+  { id: 'c4', name: 'Audio', icon: 'Headphones' },
   { id: 'c5', name: 'Cameras', icon: 'Camera' },
-  { id: 'c6', name: 'Gaming Console', icon: 'Gamepad' },
-  { id: 'c7', name: 'Smart Home', icon: 'Home' },
+  { id: 'c6', name: 'Gaming', icon: 'Gamepad' },
+  { id: 'c7', name: 'Home', icon: 'Home' },
   { id: 'c8', name: 'Accessories', icon: 'Watch' },
   { id: 'c9', name: 'Drones', icon: 'Wind' },
   { id: 'c10', name: 'Networking', icon: 'Wifi' },
   { id: 'c11', name: 'Software', icon: 'Code' },
-  { id: 'c12', name: 'Health Tech', icon: 'Activity' },
+  { id: 'c12', name: 'Health', icon: 'Activity' },
 ];
 
 export const CATEGORIES = [
@@ -39,7 +39,9 @@ export const BRANDS = [
   { name: 'Sony', url: 'https://upload.wikimedia.org/wikipedia/commons/c/c3/Sony_logo.svg' },
   { name: 'Asus', url: 'https://upload.wikimedia.org/wikipedia/commons/2/2e/ASUS_Logo.svg' },
   { name: 'Intel', url: 'https://upload.wikimedia.org/wikipedia/commons/c/c9/Intel-logo.svg' },
-  { name: 'Nvidia', url: 'https://upload.wikimedia.org/wikipedia/commons/2/21/Nvidia_logo.svg' }
+  { name: 'Nvidia', url: 'https://upload.wikimedia.org/wikipedia/commons/2/21/Nvidia_logo.svg' },
+  { name: 'RaselTech', url: '' }, // Internal Brand
+  { name: 'CyberWear', url: '' },
 ];
 
 export const MOCK_PRODUCTS: Product[] = [
@@ -49,6 +51,7 @@ export const MOCK_PRODUCTS: Product[] = [
     price: 12500,
     currency: 'BDT',
     category: 'Apparel',
+    brand: 'CyberWear',
     description: 'Adaptive thermal regulation with hydrophobic nano-coating. Features programmable LED accents controlled via app.',
     images: [
       'https://picsum.photos/id/338/600/800',
@@ -73,6 +76,7 @@ export const MOCK_PRODUCTS: Product[] = [
     price: 45000,
     currency: 'BDT',
     category: 'Tech',
+    brand: 'Apple',
     description: 'Lightweight augmented reality HUD. Instant translation, navigation overlay, and biometric tracking.',
     images: [
       'https://picsum.photos/id/250/600/800',
@@ -95,7 +99,8 @@ export const MOCK_PRODUCTS: Product[] = [
     name: 'NeoStep Gravity Boots',
     price: 8500,
     currency: 'BDT',
-    category: 'Footwear',
+    category: 'Apparel',
+    brand: 'Nike',
     description: 'Mag-lev sole technology for impact reduction. Self-lacing system with posture correction AI.',
     images: [
       'https://picsum.photos/id/21/600/800',
@@ -118,7 +123,8 @@ export const MOCK_PRODUCTS: Product[] = [
     name: 'AeroDrone Mini',
     price: 18000,
     currency: 'BDT',
-    category: 'Tech',
+    category: 'Drones',
+    brand: 'DJI',
     description: 'Pocket-sized personal drone photographer. Follow-me mode with 8K obstacle avoidance.',
     images: [
       'https://picsum.photos/id/96/600/800',
@@ -142,6 +148,7 @@ export const MOCK_PRODUCTS: Product[] = [
     price: 22000,
     currency: 'BDT',
     category: 'Tech',
+    brand: 'Samsung',
     description: 'Wrist-mounted holographic display projector. Syncs with all devices for air-touch control.',
     images: [
       'https://picsum.photos/id/175/600/800',
@@ -165,6 +172,7 @@ export const MOCK_PRODUCTS: Product[] = [
     price: 6500,
     currency: 'BDT',
     category: 'Accessories',
+    brand: 'RaselTech',
     description: 'Anti-theft minimalist backpack with solar charging fabric and signal blocking pockets.',
     images: [
       'https://picsum.photos/id/367/600/800',
@@ -188,6 +196,7 @@ export const MOCK_PRODUCTS: Product[] = [
     price: 3200,
     currency: 'BDT',
     category: 'Audio',
+    brand: 'Sony',
     description: 'Zero-latency neural interface earbuds with active noise cancellation.',
     images: ['https://picsum.photos/id/1084/600/800'],
     specs: { Battery: '30h', ANC: 'Active' },
@@ -200,6 +209,7 @@ export const MOCK_PRODUCTS: Product[] = [
     price: 4500,
     currency: 'BDT',
     category: 'Apparel',
+    brand: 'CyberWear',
     description: 'Woven with flexible solar threads to charge devices on the go.',
     images: ['https://picsum.photos/id/338/600/800'], 
     specs: { Output: '5V/2A', Fabric: 'Cotton-Tech' },
@@ -212,6 +222,7 @@ export const MOCK_PRODUCTS: Product[] = [
     price: 85000,
     currency: 'BDT',
     category: 'Gaming',
+    brand: 'Nvidia',
     description: 'Full body haptic feedback suit for VR immersion.',
     images: ['https://picsum.photos/id/1060/600/800'],
     specs: { Points: '128', Connectivity: 'WiFi 6E' },
@@ -223,7 +234,8 @@ export const MOCK_PRODUCTS: Product[] = [
     name: 'Portable Fusion Reactor',
     price: 150000,
     currency: 'BDT',
-    category: 'Energy',
+    category: 'Tech',
+    brand: 'Intel',
     description: 'Safe, pocket-sized cold fusion generator for unlimited power.',
     images: ['https://picsum.photos/id/237/600/800'],
     specs: { Output: '10kW', Safety: 'A++' },
@@ -235,6 +247,7 @@ export const MOCK_PRODUCTS: Product[] = [
     price: 1200,
     currency: 'BDT',
     category: 'Home',
+    brand: 'Xiaomi',
     description: 'AI-driven pot that moves to find sunlight.',
     images: ['https://picsum.photos/id/1080/600/800'],
     specs: { Mobility: 'Wheeled', Sensor: 'UV' },
@@ -246,6 +259,7 @@ export const MOCK_PRODUCTS: Product[] = [
     price: 2500,
     currency: 'BDT',
     category: 'Home',
+    brand: 'RaselTech',
     description: 'Cyberpunk aesthetic neon sign for wall mounting.',
     images: ['https://picsum.photos/id/1076/600/800'],
     specs: { Type: 'LED', Power: 'USB' },
@@ -257,6 +271,7 @@ export const MOCK_PRODUCTS: Product[] = [
     price: 5500,
     currency: 'BDT',
     category: 'Tech',
+    brand: 'Asus',
     description: 'Transparent chassis with RGB underglow and hot-swappable switches.',
     images: ['https://picsum.photos/id/366/600/800'],
     specs: { Switch: 'Red', Layout: '65%' },
@@ -268,6 +283,7 @@ export const MOCK_PRODUCTS: Product[] = [
     price: 1500,
     currency: 'BDT',
     category: 'Gaming',
+    brand: 'Sony',
     description: 'Plug and play HDMI stick with 10,000 classic games.',
     images: ['https://picsum.photos/id/96/600/800'],
     specs: { Games: '10k+', Output: 'HDMI' },
@@ -278,7 +294,8 @@ export const MOCK_PRODUCTS: Product[] = [
     name: 'CyberDog 2.0',
     price: 250000,
     currency: 'BDT',
-    category: 'Robotics',
+    category: 'Tech',
+    brand: 'Xiaomi',
     description: 'Loyal robotic companion with advanced pathfinding.',
     images: ['https://picsum.photos/id/169/600/800'],
     specs: { Speed: '3m/s', Battery: '2h' },

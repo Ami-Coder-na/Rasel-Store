@@ -4,18 +4,21 @@ import {
   User, Package, Settings, Clock, LogOut, Camera, 
   MapPin, Mail, Phone, Shield, Edit2, ChevronRight, 
   CreditCard, CheckCircle, Clock3, XCircle, ShoppingBag, 
-  Truck, Save, X, Box, ArrowRight, Star, Upload, ThumbsUp, Image as ImageIcon
+  Truck, Save, X, Box, ArrowRight, Star, Upload, ThumbsUp, Image as ImageIcon,
+  Heart
 } from 'lucide-react';
-import { UserProfile, Order, ActivityLog, CartItem } from '../types';
+import { UserProfile, Order, ActivityLog, CartItem, Product } from '../types';
 import { MOCK_ORDERS, MOCK_ACTIVITY } from '../constants';
 
 interface UserProfileViewProps {
   user: UserProfile;
   onLogout: () => void;
   onUpdateUser: (updatedUser: UserProfile) => void;
+  wishlist: Product[];
+  onToggleWishlist: (product: Product) => void;
 }
 
-type TabType = 'dashboard' | 'orders' | 'settings' | 'activity';
+type TabType = 'dashboard' | 'orders' | 'settings' | 'activity' | 'wishlist';
 
 // --- Tracking Components ---
 
@@ -160,7 +163,7 @@ const ReviewModal: React.FC<{ order: Order; onClose: () => void }> = ({ order, o
 
    const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
       if (e.target.files) {
-         const newImages = Array.from(e.target.files).map(file => URL.createObjectURL(file));
+         const newImages = Array.from(e.target.files).map((file) => URL.createObjectURL(file as File));
          setImages(prev => [...prev, ...newImages]);
       }
    };
@@ -337,7 +340,7 @@ const ReviewModal: React.FC<{ order: Order; onClose: () => void }> = ({ order, o
 
 // --- Main Component ---
 
-export const UserProfileView: React.FC<UserProfileViewProps> = ({ user, onLogout, onUpdateUser }) => {
+export const UserProfileView: React.FC<UserProfileViewProps> = ({ user, onLogout, onUpdateUser, wishlist, onToggleWishlist }) => {
   const [activeTab, setActiveTab] = useState<TabType>('dashboard');
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [trackingOrder, setTrackingOrder] = useState<Order | null>(null);
@@ -432,6 +435,7 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ user, onLogout
           <nav className="space-y-2">
             <TabButton id="dashboard" icon={User} label="Overview" />
             <TabButton id="orders" icon={Package} label="My Orders" />
+            <TabButton id="wishlist" icon={Heart} label="Wishlist" />
             <TabButton id="activity" icon={Clock} label="Activity Log" />
             <TabButton id="settings" icon={Settings} label="Settings" />
           </nav>
@@ -573,6 +577,40 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ user, onLogout
                   ))}
                </div>
             </div>
+          )}
+
+          {/* Wishlist View */}
+          {activeTab === 'wishlist' && (
+             <div className="space-y-6 animate-fade-in">
+                <h2 className="text-2xl font-bold dark:text-white">My Wishlist ({wishlist.length})</h2>
+                {wishlist.length === 0 ? (
+                   <div className="text-center py-12 bg-gray-50 dark:bg-white/5 rounded-xl border border-dashed border-gray-300 dark:border-gray-700">
+                      <Heart className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                      <p className="text-gray-500 font-medium">Your wishlist is empty</p>
+                      <button onClick={() => setActiveTab('dashboard')} className="text-cyan-600 font-bold text-sm mt-2 hover:underline">Browse Products</button>
+                   </div>
+                ) : (
+                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {wishlist.map(product => (
+                         <div key={product.id} className="bg-white dark:bg-black/20 border border-gray-200 dark:border-white/5 rounded-xl p-4 flex gap-4 relative group hover:shadow-lg transition-all">
+                            <div className="w-20 h-20 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
+                               <img src={product.images[0]} className="w-full h-full object-cover" />
+                            </div>
+                            <div className="flex-1">
+                               <h4 className="font-bold text-sm dark:text-white line-clamp-2 mb-1">{product.name}</h4>
+                               <p className="text-orange-500 font-bold text-sm">৳{product.price.toLocaleString()}</p>
+                               <button 
+                                 onClick={() => onToggleWishlist(product)}
+                                 className="text-xs text-red-500 hover:underline mt-2 flex items-center gap-1 font-medium"
+                               >
+                                 <Heart className="w-3 h-3 fill-current" /> Remove
+                               </button>
+                            </div>
+                         </div>
+                      ))}
+                   </div>
+                )}
+             </div>
           )}
 
           {/* Settings View */}
