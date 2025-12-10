@@ -1,14 +1,25 @@
 import { GoogleGenAI, GenerateContentResponse } from "@google/genai";
 import { Product } from '../types';
 
-// Initialize Gemini Client
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+// Lazy Initialize Gemini Client to prevent crash on load
+let ai: GoogleGenAI | null = null;
+
+const getAIClient = () => {
+    if (!ai) {
+        // Use empty string fallback to prevent crash if key is missing during render
+        const apiKey = process.env.API_KEY || '';
+        ai = new GoogleGenAI({ apiKey });
+    }
+    return ai;
+}
 
 export const generateShoppingAdvice = async (
   query: string,
   context: { products: Product[]; cart: Product[] }
 ): Promise<string> => {
   try {
+    const aiClient = getAIClient();
+    
     const productContext = context.products
       .map((p) => `- ${p.name} (${p.price} ${p.currency}): ${p.description}`)
       .join('\n');
@@ -35,7 +46,7 @@ export const generateShoppingAdvice = async (
       6. If the query is in Bangla (e.g., "ei shirt ta kemon?"), reply in English but acknowledge the context, or reply in Bangla if you are confident.
     `;
 
-    const response: GenerateContentResponse = await ai.models.generateContent({
+    const response: GenerateContentResponse = await aiClient.models.generateContent({
       model: 'gemini-2.5-flash',
       contents: query,
       config: {
